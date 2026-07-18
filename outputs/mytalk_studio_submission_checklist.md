@@ -1,4 +1,4 @@
-# MyTalk Studio 最终提交清单
+# MyTalk 最终提交清单
 
 ## 必交材料
 
@@ -6,7 +6,7 @@
 - [ ] 企业命题选择：新航道 TED。
 - [ ] Part 1 命题前置分析与洞察：使用 `mytalk_studio_opening_report.md`。
 - [ ] Part 2 整体解决方案设计：使用 `mytalk_studio_opening_report.md`。
-- [ ] 项目介绍 PDF：`MyTalk_Studio_项目介绍.pdf`。
+- [ ] 项目介绍 PDF：`MyTalk_项目介绍.pdf`。
 - [ ] 可运行 Demo：`mytalk_studio_demo.html`，或可访问的线上链接。
 
 ## 强烈建议附上
@@ -19,11 +19,11 @@
 
 ### 队伍名称
 
-推荐：**MyTalk Studio**
+推荐：**声迹**
 
 ### 项目名称
 
-**MyTalk Studio：从 TED Talk 到 My Talk 的表达成长平台**
+**MyTalk：从 TED Talk 到 My Talk 的表达成长平台**
 
 ### 一句话介绍
 
@@ -44,7 +44,7 @@
 3. **0:45 - 1:25：表达工坊**。以 TED 感受进入，选择足迹，经过 AI 追问，形成自己的表达草稿。
 4. **1:25 - 1:55：思想图书馆**。将作品制作成封面并分享；他人可以认同、追问和收藏，形成真实反馈。
 5. **1:55 - 2:20：成长主页**。足迹、成稿、主题和表达日历让持续积累可见。
-6. **2:20 - 2:30：结尾**。TED 是思想入口，MyTalk Studio 帮助学生把启发变成自己的声音。
+6. **2:20 - 2:30：结尾**。TED 是思想入口，MyTalk 帮助学生把启发变成自己的声音。
 
 ## 提交前十分钟检查
 

@@ -192,53 +192,6 @@
 
     .topbar p.hidden { display: none; }
 
-    .presentation-switch {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 10px 0;
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
-    }
-
-    .presentation-switch input {
-      position: absolute;
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .presentation-switch .switch-track {
-      width: 38px;
-      height: 22px;
-      padding: 3px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: #eee9dd;
-      display: flex;
-      align-items: center;
-      transition: background .18s ease, border-color .18s ease;
-    }
-
-    .presentation-switch .switch-track::after {
-      content: "";
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #fffdf5;
-      box-shadow: 0 1px 4px rgba(65, 56, 42, .2);
-      transition: transform .18s ease;
-    }
-
-    .presentation-switch input:checked + .switch-track {
-      background: var(--view-accent);
-      border-color: var(--view-accent);
-    }
-
-    .presentation-switch input:checked + .switch-track::after { transform: translateX(16px); }
-    .presentation-switch input:focus-visible + .switch-track { box-shadow: 0 0 0 4px var(--view-soft); }
-
     .streak {
       border: 1px solid rgba(255, 255, 255, .56);
       background: rgba(255, 253, 245, .76);
@@ -754,132 +707,6 @@
 
     #usedMaterial { align-content: start; }
 
-    .panel-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-
-    .panel-close { display: none; }
-
-    body.presentation-mode {
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    .presentation-mode .app {
-      height: 100vh;
-      min-height: 0;
-      grid-template-columns: 212px minmax(0, 1fr);
-    }
-
-    .presentation-mode aside {
-      padding: 16px 12px;
-      gap: 10px;
-    }
-
-    .presentation-mode .logo {
-      padding: 2px 4px 12px;
-    }
-
-    .presentation-mode .logo h1 { font-size: 21px; }
-    .presentation-mode .logo p { margin-top: 4px; font-size: 11px; }
-    .presentation-mode .nav { gap: 4px; }
-    .presentation-mode .nav button { padding: 8px; }
-
-    .presentation-mode main {
-      height: 100vh;
-      min-height: 0;
-      overflow-y: auto;
-      padding: 16px clamp(16px, 3vw, 34px);
-      gap: 12px;
-    }
-
-    .presentation-mode .topbar {
-      padding: 13px 17px;
-      gap: 4px;
-    }
-
-    .presentation-mode .topbar h2 { font-size: clamp(25px, 3vw, 32px); }
-    .presentation-mode .topbar p { margin-top: 3px; font-size: 13px; line-height: 1.45; }
-    .presentation-mode .view { gap: 12px; }
-    .presentation-mode .panel { padding: 14px; }
-    .presentation-mode .panel h3, .presentation-mode .card h3 { font-size: 16px; }
-    .presentation-mode .section-note { display: none; }
-    .presentation-mode .field { gap: 5px; }
-    .presentation-mode label { font-size: 12px; }
-    .presentation-mode input, .presentation-mode textarea, .presentation-mode select { padding: 9px 10px; }
-    .presentation-mode textarea { min-height: 72px; line-height: 1.55; }
-    .presentation-mode .actions { margin-top: 9px; gap: 8px; }
-    .presentation-mode .primary { padding: 10px 13px; }
-    .presentation-mode .secondary { padding: 9px 12px; }
-    .presentation-mode .mini { padding: 6px 8px; }
-
-    .presentation-mode #footprints {
-      grid-template-columns: minmax(300px, .84fr) minmax(0, 1.36fr);
-      align-items: stretch;
-    }
-
-    .presentation-mode #footprints .footprint-editor-panel,
-    .presentation-mode #footprints .my-footprints-panel { height: 100%; }
-
-    .presentation-mode #footprints .collected-panel { display: none; }
-    .presentation-mode #footprints .footprint-board { gap: 9px; }
-    .presentation-mode #footprints .note { min-height: 0; padding: 10px; gap: 6px; }
-    .presentation-mode #footprints .note textarea { min-height: 54px; max-height: 74px; font-size: 13px; }
-    .presentation-mode #footprints .note input,
-    .presentation-mode #footprints .note-actions [data-edit-note] { display: none; }
-    .presentation-mode #footprints .note-meta { font-size: 11px; }
-    .presentation-mode #footprints #footprintBoard > .note:nth-child(n+4) { display: none; }
-    .presentation-mode #footprints #tagFilters { margin: 9px 0 !important; }
-
-    .presentation-mode #studio > .growth-pair {
-      grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr);
-      align-items: stretch;
-    }
-
-    .presentation-mode #studio #studioText { min-height: 66px; }
-    .presentation-mode #studio #selectedFootprints { max-height: 260px; overflow-y: auto; }
-    .presentation-mode #studio .selected-material { gap: 8px; }
-    .presentation-mode #studio .selected-material .quote { padding: 9px 10px; }
-    .presentation-mode #studio .entry-hint { display: none; }
-
-    .presentation-mode #dialoguePanel:not(.hidden),
-    .presentation-mode #draftPanel:not(.hidden) {
-      position: fixed;
-      z-index: 20;
-      inset: 18px 26px 18px 232px;
-      overflow-y: auto;
-      box-shadow: 0 24px 70px rgba(51, 43, 33, .26);
-    }
-
-    .presentation-mode #dialoguePanel .panel-close,
-    .presentation-mode #draftPanel .panel-close { display: inline-flex; }
-    .presentation-mode #draftPanel .expression-output { max-height: 280px; }
-    .presentation-mode #draftPanel .post-cover { min-height: 130px; }
-
-    .presentation-mode #library > .panel { padding: 14px; }
-    .presentation-mode #libraryGrid { gap: 12px; }
-    .presentation-mode #libraryGrid > .library-card:nth-child(n+4) { display: none; }
-    .presentation-mode #libraryGrid .library-card { padding: 12px; gap: 8px; }
-    .presentation-mode #libraryGrid .post-cover { min-height: 142px; padding: 13px; }
-    .presentation-mode #libraryGrid .cover-title { font-size: 18px; }
-    .presentation-mode #libraryGrid .post-snippet { -webkit-line-clamp: 2; }
-    .presentation-mode #libraryGrid .actions { display: none; }
-
-    .presentation-mode #growth { gap: 12px; }
-    .presentation-mode #growth .profile-summary { gap: 18px; }
-    .presentation-mode #growth .profile-stats { min-height: 88px; }
-    .presentation-mode #growth .profile-stat strong { font-size: 27px; }
-    .presentation-mode #growth .profile-stat span { margin-top: 5px; }
-    .presentation-mode #growth .profile-actions { margin-top: 9px; }
-    .presentation-mode #growth .growth-pair { gap: 12px; }
-    .presentation-mode #growth .growth-pair .panel { min-height: 0; }
-    .presentation-mode #growth .calendar { gap: 4px; margin-top: 10px; }
-    .presentation-mode #growth .calendar-caption { margin-top: 10px; font-size: 12px; }
-    .presentation-mode #growth .featured-section { display: none; }
-
     .empty {
       border: 1px dashed var(--line);
       border-radius: var(--radius);
@@ -1259,11 +1086,6 @@
         <button data-view="library"><span>3</span><span>思想图书馆</span></button>
         <button data-view="growth"><span>4</span><span>成长</span></button>
       </nav>
-      <label class="presentation-switch" for="presentationModeInput">
-        <span>演示模式</span>
-        <input id="presentationModeInput" type="checkbox" aria-label="切换演示模式">
-        <span class="switch-track" aria-hidden="true"></span>
-      </label>
     </aside>
 
     <main>
@@ -1275,7 +1097,7 @@
       </section>
 
       <section class="view active" id="footprints">
-        <div class="panel footprint-editor-panel">
+        <div class="panel">
           <h3 id="footprintEditorTitle">留下一个足迹</h3>
           <p class="section-note">先记住一个瞬间。它可以只有一句话，之后再慢慢长成更清楚的表达。</p>
           <div class="grid two" style="margin-top:14px;">
@@ -1300,13 +1122,13 @@
           </div>
         </div>
 
-        <div class="panel my-footprints-panel">
+        <div class="panel">
           <h3>我的足迹纸条</h3>
           <div class="tag-row" id="tagFilters" style="margin:12px 0 14px;"></div>
           <div class="footprint-board" id="footprintBoard"></div>
         </div>
 
-        <div class="panel collected-panel">
+        <div class="panel">
           <h3>我收藏的足迹纸条</h3>
           <p class="section-note">在思想图书馆读到、想留给以后的那些话，会放在这里。</p>
           <div class="footprint-board" id="collectedFootprintBoard" style="margin-top:14px;"></div>
@@ -1358,10 +1180,7 @@
         </div>
 
         <div class="panel hidden" id="dialoguePanel">
-          <div class="panel-heading">
-            <h3>和 AI 把话说清</h3>
-            <button class="secondary panel-close" type="button" data-close-workspace="dialoguePanel">收起</button>
-          </div>
+          <h3>和 AI 把话说清</h3>
           <div class="question-card" style="margin-top:14px;">
             <div class="question-tabs" id="questionTabs"></div>
             <div class="prompt" id="currentQuestion"></div>
@@ -1377,10 +1196,7 @@
         </div>
 
         <div class="panel hidden" id="draftPanel">
-          <div class="panel-heading">
-            <h3>我的表达草稿 <span class="draft-meta" id="draftMeta"></span></h3>
-            <button class="secondary panel-close" type="button" data-close-workspace="draftPanel">收起</button>
-          </div>
+          <h3>我的表达草稿 <span class="draft-meta" id="draftMeta"></span></h3>
           <div class="grid two" style="margin-top:14px;">
             <div class="draft-card">
               <div class="post-cover" id="draftCover">
@@ -1587,7 +1403,6 @@
 
     const byId = id => document.getElementById(id);
     const storageKey = "mytalk-studio-state-v3";
-    const presentationStorageKey = "mytalk-studio-presentation-mode";
     let readerIndex = null;
     let chooserIds = [];
     let chooserTag = "全部";
@@ -1704,7 +1519,6 @@
 
     function showView(id) {
       state.view = id;
-      closeWorkspacePanels();
       applyViewTheme(id);
       document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === id));
       document.querySelectorAll(".nav button").forEach(button => button.classList.toggle("active", button.dataset.view === id));
@@ -1712,22 +1526,6 @@
       byId("pageLead").textContent = viewMeta[id][1];
       byId("pageLead").classList.toggle("hidden", !viewMeta[id][1]);
       if (id === "studio") updateEntryHint();
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-
-    function closeWorkspacePanels() {
-      byId("dialoguePanel").classList.add("hidden");
-      byId("draftPanel").classList.add("hidden");
-    }
-
-    function setPresentationMode(enabled) {
-      document.body.classList.toggle("presentation-mode", enabled);
-      byId("presentationModeInput").checked = enabled;
-      try {
-        localStorage.setItem(presentationStorageKey, String(enabled));
-      } catch (error) {
-        console.info("演示模式状态无法保存。", error);
-      }
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -2180,16 +1978,6 @@
       button.addEventListener("click", () => showView(button.dataset.view));
     });
 
-    byId("presentationModeInput").addEventListener("change", event => {
-      setPresentationMode(event.target.checked);
-    });
-
-    document.querySelectorAll("[data-close-workspace]").forEach(button => {
-      button.addEventListener("click", () => {
-        byId(button.dataset.closeWorkspace).classList.add("hidden");
-      });
-    });
-
     document.querySelectorAll("[data-view-jump]").forEach(button => {
       button.addEventListener("click", () => showView(button.dataset.viewJump));
     });
@@ -2364,11 +2152,6 @@
     renderAll();
     applyViewTheme(state.view);
     updateEntryHint();
-    try {
-      setPresentationMode(localStorage.getItem(presentationStorageKey) === "true");
-    } catch (error) {
-      setPresentationMode(false);
-    }
   </script>
 </body>
 </html>
