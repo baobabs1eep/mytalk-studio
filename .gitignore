@@ -1,0 +1,12 @@
+# System files
+.DS_Store
+Thumbs.db
+
+# Local build and review files
+work/
+*.tmp
+
+# Personal and generated documents are not part of the public project repository
+outputs/*.docx
+outputs/*.pdf
+

@@ -1,0 +1,2157 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>声迹 MyTalk</title>
+  <style>
+    @font-face {
+      font-family: "Source Han Serif SC Light";
+      src: local("Source Han Serif SC Light"), local("思源宋体 Light"), local("Source Han Serif SC");
+      font-weight: 300;
+      font-style: normal;
+    }
+
+    @font-face {
+      font-family: "Anthropic Serif";
+      src: local("Anthropic-Serif Regular"), local("Anthropic Serif Regular"), local("Anthropic-Serif");
+      font-weight: 400;
+      font-style: normal;
+    }
+
+    :root {
+      --bg: #f4f1e8;
+      --panel: #fffdf5;
+      --panel-soft: #f4f1e8;
+      --ink: #2b2924;
+      --muted: #746d61;
+      --line: #ddd6c8;
+      --red: #ed9874;
+      --orange: #f3bf4c;
+      --yellow: #e9eeb9;
+      --green: #698e6a;
+      --blue: #2f90b9;
+      --violet: #7c739f;
+      --view-deep: #698e6a;
+      --view-pale: #c9cfc1;
+      --view-paper: #fffdf5;
+      --view-accent: #4b7b57;
+      --view-ink: #2f4738;
+      --view-soft: rgba(105, 142, 106, .14);
+      --view-wash: rgba(105, 142, 106, .16);
+      --shadow: 0 16px 38px rgba(65, 56, 42, .1);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Source Han Serif SC Light", "Source Han Serif SC", "思源宋体 Light", "Songti SC", "Noto Serif CJK SC", serif;
+      background:
+        radial-gradient(circle at 18% 10%, var(--view-wash) 0%, transparent 28%),
+        radial-gradient(circle at 88% 4%, rgba(255, 253, 245, .82) 0%, transparent 24%),
+        linear-gradient(180deg, var(--view-paper) 0%, var(--bg) 300px),
+        var(--bg);
+      color: var(--ink);
+    }
+
+    :lang(en),
+    .latin {
+      font-family: "Anthropic Serif", "Anthropic-Serif", "Times New Roman", serif;
+      font-weight: 400;
+    }
+
+    button, input, textarea, select { font: inherit; }
+    button { cursor: pointer; }
+
+    .app {
+      display: grid;
+      grid-template-columns: 236px minmax(0, 1fr);
+      min-height: 100vh;
+    }
+
+    aside {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      padding: 22px 16px;
+      border-right: 1px solid rgba(91, 79, 60, .16);
+      background:
+        radial-gradient(circle at 24% 12%, rgba(243, 191, 76, .18), transparent 34%),
+        linear-gradient(180deg, #fffdf5 0%, #f2ead8 100%);
+      backdrop-filter: blur(12px);
+      display: grid;
+      align-content: start;
+      gap: 18px;
+    }
+
+    .logo {
+      padding: 4px 4px 18px;
+      border-bottom: 1px solid rgba(75, 61, 42, .18);
+    }
+
+    .logo h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0;
+    }
+
+    .logo p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .nav {
+      display: grid;
+      gap: 8px;
+    }
+
+    .nav button {
+      border: 1px solid transparent;
+      background: transparent;
+      border-radius: var(--radius);
+      padding: 11px 10px;
+      text-align: left;
+      color: var(--muted);
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .nav button span:first-child {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .nav button:nth-child(1) { --nav-fill: #7d9a7d; --nav-active: #506f57; --nav-wash: rgba(125, 154, 125, .14); }
+    .nav button:nth-child(2) { --nav-fill: #6f91a8; --nav-active: #405f78; --nav-wash: rgba(111, 145, 168, .14); }
+    .nav button:nth-child(3) { --nav-fill: #c9a45f; --nav-active: #896629; --nav-wash: rgba(201, 164, 95, .15); }
+    .nav button:nth-child(4) { --nav-fill: #9189a9; --nav-active: #625b7a; --nav-wash: rgba(145, 137, 169, .14); }
+
+    .nav button span:first-child { background: var(--nav-fill); }
+    .nav button:nth-child(3) span:first-child { color: #382f20; }
+
+    .nav button.active {
+      background: var(--nav-wash);
+      border-color: color-mix(in srgb, var(--nav-active) 26%, transparent);
+      color: #33281f;
+      font-weight: 700;
+    }
+
+    .nav button.active span:first-child {
+      background: var(--nav-active);
+      color: #fffdf5;
+    }
+
+    main {
+      padding: 28px clamp(16px, 4vw, 48px) 48px;
+      display: grid;
+      gap: 18px;
+      align-content: start;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+      background:
+        radial-gradient(circle at 18% 24%, rgba(255, 255, 255, .52), transparent 28%),
+        radial-gradient(circle at 84% 12%, rgba(255, 255, 255, .36), transparent 22%),
+        linear-gradient(145deg, var(--view-paper) 0%, var(--view-pale) 46%, var(--view-deep) 100%);
+      border: 1px solid rgba(255, 255, 255, .62);
+      border-radius: var(--radius);
+      padding: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .topbar h2 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 38px);
+      letter-spacing: 0;
+      color: var(--view-ink);
+    }
+
+    .topbar p {
+      margin: 8px 0 0;
+      color: rgba(51, 43, 33, .72);
+      line-height: 1.65;
+      max-width: 820px;
+    }
+
+    .topbar p.hidden { display: none; }
+
+    .streak {
+      border: 1px solid rgba(255, 255, 255, .56);
+      background: rgba(255, 253, 245, .76);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      min-width: 144px;
+      color: var(--view-ink);
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .streak small {
+      display: block;
+      color: #7c7467;
+      font-weight: 400;
+      margin-top: 2px;
+    }
+
+    .view {
+      display: none;
+      gap: 16px;
+    }
+
+    .view.active { display: grid; }
+
+    .grid { display: grid; gap: 14px; align-items: start; }
+    .two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+
+    .panel, .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel { padding: 20px; }
+
+    .panel h3, .card h3 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0;
+    }
+
+    .panel p, .card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .section-note {
+      margin-top: 7px !important;
+      max-width: 62ch;
+      font-size: 14px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    label {
+      color: #344054;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    input, textarea, select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+      padding: 12px 13px;
+    }
+
+    textarea {
+      min-height: 118px;
+      resize: vertical;
+      line-height: 1.7;
+    }
+
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--view-accent);
+      box-shadow: 0 0 0 4px var(--view-soft);
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    .primary, .secondary, .mini {
+      border-radius: var(--radius);
+      font-weight: 800;
+    }
+
+    .primary {
+      border: 0;
+      background: var(--view-accent);
+      color: #fff;
+      padding: 12px 16px;
+    }
+
+    .primary:hover { filter: brightness(.9); }
+
+    .secondary {
+      border: 1px solid var(--line);
+      background: #fffaf0;
+      color: var(--ink);
+      padding: 11px 15px;
+    }
+
+    .mini {
+      border: 1px solid var(--line);
+      background: #fffaf0;
+      color: var(--ink);
+      padding: 8px 10px;
+      font-size: 12px;
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border: 1px solid rgba(91, 79, 60, .1);
+      border-radius: var(--radius);
+      padding: 5px 9px;
+      background: rgba(255, 253, 245, .86);
+      color: var(--view-accent);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .tag.orange { background: rgba(243, 191, 76, .22); color: #8a641a; }
+    .tag.green { background: rgba(105, 142, 106, .18); color: #3f6548; }
+    .tag.red { background: rgba(237, 152, 116, .2); color: #96513a; }
+    .tag.violet { background: rgba(124, 115, 159, .18); color: #5f587c; }
+    .tag.blue { background: rgba(130, 171, 204, .18); border-color: rgba(67, 115, 143, .14); color: #3d6f8c; }
+
+    .tag.filter {
+      border-color: var(--line);
+      background: #fffaf0;
+      color: var(--muted);
+    }
+
+    .tag.filter.active {
+      border-color: rgba(91, 79, 60, .18);
+      background: linear-gradient(90deg, var(--view-paper), var(--view-pale));
+      color: var(--view-ink);
+    }
+
+    .footprint-board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .note {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      gap: 10px;
+      background: linear-gradient(180deg, #ffffff 0%, var(--view-paper) 100%);
+      min-height: 184px;
+    }
+
+    .note-top {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .stage {
+      display: inline-flex;
+      align-items: center;
+      width: fit-content;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stage.fragment { background: #f5e5dc; color: #91533b; }
+    .stage.opened { background: #e7edcc; color: #52643e; }
+    .stage.draft { background: #e4e1ee; color: #5b527e; }
+
+    .status-select {
+      width: auto;
+      min-width: 78px;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: var(--panel-soft);
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .note-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+    }
+
+    .note.selected {
+      border-color: var(--view-deep);
+      box-shadow: 0 0 0 4px var(--view-soft);
+    }
+
+    .note.editing {
+      border-color: var(--view-accent);
+      box-shadow: 0 0 0 4px rgba(255, 253, 245, .9), inset 0 0 0 2px var(--view-accent);
+    }
+
+    .note textarea {
+      border: 0;
+      padding: 0;
+      min-height: 48px;
+      box-shadow: none;
+      background: transparent;
+    }
+
+    .note input {
+      padding: 8px 9px;
+      font-size: 12px;
+      background: var(--panel-soft);
+    }
+
+    .note-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .calendar {
+      display: grid;
+      grid-template-columns: repeat(14, 1fr);
+      gap: 6px;
+      margin-top: 16px;
+    }
+
+    .day {
+      aspect-ratio: 1;
+      border-radius: 3px;
+      background: #d8d5df;
+      border: 1px solid transparent;
+    }
+
+    .day.lv1 { background: #b8b2ca; }
+    .day.lv2 { background: #8d84ad; }
+    .day.lv3 { background: #625b7a; }
+
+    .profile-summary {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, .8fr);
+      gap: 28px;
+      align-items: center;
+    }
+
+    .profile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: center;
+      min-height: 110px;
+      border-left: 1px solid var(--line);
+    }
+
+    .profile-stat {
+      min-width: 0;
+      padding: 0 16px;
+      text-align: center;
+    }
+
+    .profile-stat + .profile-stat { border-left: 1px solid var(--line); }
+
+    .profile-stat strong {
+      display: block;
+      color: var(--view-ink);
+      font-family: "Anthropic Serif", "Anthropic-Serif", "Times New Roman", serif;
+      font-size: 32px;
+      font-weight: 400;
+      line-height: 1;
+    }
+
+    .profile-stat span {
+      display: block;
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .calendar-caption {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .calendar-legend {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .calendar-legend i {
+      width: 12px;
+      height: 12px;
+      border-radius: 3px;
+      background: #d8d5df;
+    }
+
+    .calendar-legend i:nth-of-type(2) { background: #b8b2ca; }
+    .calendar-legend i:nth-of-type(3) { background: #8d84ad; }
+    .calendar-legend i:nth-of-type(4) { background: #625b7a; }
+
+    .growth-pair {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: stretch;
+    }
+
+    .growth-pair > .panel {
+      display: grid;
+      align-content: start;
+    }
+
+    .featured-section {
+      display: grid;
+      gap: 14px;
+    }
+
+    .featured-section > h3 {
+      margin: 0;
+    }
+
+    .featured-grid {
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    }
+
+    .library-card, .draft-card {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(180deg, #ffffff 0%, var(--view-paper) 100%);
+      padding: 16px;
+      display: grid;
+      gap: 11px;
+      align-content: start;
+    }
+
+    .cover-button {
+      width: 100%;
+      border: 0;
+      text-align: left;
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .post-cover {
+      min-height: 180px;
+      border-radius: calc(var(--radius) - 1px);
+      padding: 16px;
+      display: grid;
+      align-content: end;
+      gap: 8px;
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,.04) 44%, rgba(30, 22, 16, .38) 100%),
+        linear-gradient(135deg, var(--view-pale) 0%, var(--view-deep) 100%);
+      color: #fffaf3;
+    }
+
+    .post-cover h3 {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.4;
+      color: inherit;
+    }
+
+    .post-cover .cover-title {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .post-cover p {
+      margin: 0;
+      color: rgba(255, 250, 243, .88);
+      line-height: 1.6;
+    }
+
+    .post-snippet {
+      color: var(--muted);
+      line-height: 1.7;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .post-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .library-card header {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .library-card h3 {
+      font-size: 17px;
+    }
+
+    .quote {
+      border: 1px solid rgba(91, 79, 60, .16);
+      background: var(--view-soft);
+      padding: 12px 13px;
+      border-radius: var(--radius);
+      color: var(--view-ink);
+      line-height: 1.7;
+    }
+
+    .entry-hint {
+      margin-top: 8px !important;
+      font-size: 13px;
+      color: var(--view-accent) !important;
+    }
+
+    .draft-meta {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 400;
+    }
+
+    .question-card {
+      border: 1px solid rgba(91, 79, 60, .16);
+      background: linear-gradient(135deg, var(--view-paper), var(--view-soft));
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .question-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .qtab {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--muted);
+      border-radius: var(--radius);
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .qtab.active {
+      background: var(--view-accent);
+      border-color: var(--view-accent);
+      color: #fff;
+    }
+
+    .qtab.done {
+      color: var(--view-accent);
+      background: var(--view-soft);
+      border-color: var(--view-deep);
+    }
+
+    .prompt {
+      color: var(--view-accent);
+      line-height: 1.7;
+      font-weight: 700;
+    }
+
+    #draftClaim {
+      min-height: 72px;
+    }
+
+    .expression-output {
+      min-height: 120px;
+      max-height: 560px;
+      line-height: 1.8;
+      overflow-y: auto;
+    }
+
+    #usedMaterial { align-content: start; }
+
+    .empty {
+      border: 1px dashed var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      color: var(--muted);
+      text-align: center;
+      background: var(--panel-soft);
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(circle at 28% 18%, rgba(255, 119, 15, .24), transparent 32%),
+        radial-gradient(circle at 74% 72%, rgba(205, 218, 153, .22), transparent 34%),
+        rgba(67, 48, 37, .42);
+      display: grid;
+      place-items: center;
+      padding: 20px;
+      z-index: 10;
+    }
+
+    .modal.hidden { display: none; }
+
+    .modal-card {
+      width: min(660px, 100%);
+      background: linear-gradient(135deg, #fffaf0 0%, #f9e8c8 54%, #edb79c 100%);
+      border-radius: var(--radius);
+      border: 1px solid #efc7a9;
+      box-shadow: 0 28px 70px rgba(87, 53, 31, .25);
+      padding: 30px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .modal-card h2 {
+      margin: 0;
+      font-size: clamp(28px, 5vw, 42px);
+      letter-spacing: 0;
+      color: #2b211b;
+    }
+
+    .modal-card p {
+      margin: 0;
+      color: #6f5444;
+      line-height: 1.85;
+      font-size: 17px;
+    }
+
+    .modal-card .tag {
+      background: rgba(255, 247, 232, .78);
+      color: #9a4a1c;
+      border-color: rgba(201, 101, 50, .24);
+    }
+
+    .modal-card .primary {
+      background: #c96532;
+      box-shadow: 0 12px 28px rgba(201, 101, 50, .22);
+    }
+
+    .modal-card .primary:hover { background: #a94f25; }
+
+    .modal-card .secondary {
+      background: rgba(255, 250, 242, .72);
+      border-color: #e8c6ae;
+      color: #4d3729;
+    }
+
+    .modal-note {
+      color: #8b6a57;
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    .reader-modal {
+      background: rgba(67, 48, 37, .5);
+    }
+
+    .reader-card {
+      width: min(760px, 100%);
+      max-height: min(860px, calc(100vh - 40px));
+      overflow: auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 28px 70px rgba(87, 53, 31, .25);
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .reader-header,
+    .reader-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .reader-header strong {
+      color: var(--view-ink);
+      font-size: 18px;
+    }
+
+    .reader-text {
+      max-width: 65ch;
+      white-space: pre-wrap;
+      color: var(--ink);
+      line-height: 1.9;
+      font-size: 16px;
+    }
+
+    .reader-footer {
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+
+    .chooser-card {
+      width: min(900px, 100%);
+      max-height: min(820px, calc(100vh - 40px));
+      overflow: auto;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 28px 70px rgba(87, 53, 31, .25);
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .chooser-header {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .chooser-header h2 {
+      margin: 0;
+      color: var(--view-ink);
+      font-size: 22px;
+    }
+
+    .chooser-header p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    .chooser-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .chooser-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .chooser-note {
+      width: 100%;
+      min-height: 152px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      padding: 14px;
+      text-align: left;
+      color: var(--ink);
+      display: grid;
+      align-content: start;
+      gap: 10px;
+    }
+
+    .chooser-note:hover { border-color: var(--view-deep); }
+
+    .chooser-note.selected {
+      border-color: var(--view-deep);
+      background: var(--view-soft);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--view-deep) 16%, transparent);
+    }
+
+    .chooser-note p {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.65;
+    }
+
+    .chooser-footer {
+      position: sticky;
+      bottom: -20px;
+      margin: 0 -20px -20px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+      background: var(--panel);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .selected-material {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .selected-material .mini { flex: 0 0 auto; }
+
+    .profile-actions {
+      margin-top: 14px;
+    }
+
+    .profile-editor-card {
+      width: min(520px, 100%);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: 0 28px 70px rgba(87, 53, 31, .25);
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+
+    .profile-editor-card h2 {
+      margin: 0;
+      color: var(--view-ink);
+      font-size: 22px;
+    }
+
+    .collected-note {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 14px;
+      display: grid;
+      align-content: start;
+      gap: 10px;
+      background: linear-gradient(180deg, #ffffff 0%, var(--panel-soft) 100%);
+    }
+
+    .collected-note p {
+      margin: 0;
+      color: var(--ink);
+      line-height: 1.65;
+    }
+
+    button:focus-visible,
+    input:focus-visible,
+    textarea:focus-visible,
+    select:focus-visible {
+      outline: 3px solid rgba(47, 144, 185, .32);
+      outline-offset: 2px;
+    }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 1060px) {
+      .app { grid-template-columns: 1fr; }
+      aside {
+        position: static;
+        height: auto;
+      }
+      .nav { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .two, .three, .footprint-board { grid-template-columns: 1fr; }
+      .profile-summary { grid-template-columns: 1fr; }
+      .profile-stats { border-left: 0; border-top: 1px solid var(--line); padding-top: 20px; }
+    }
+
+    @media (max-width: 680px) {
+      main { padding: 18px 14px 36px; }
+      aside { padding: 16px 14px; }
+      .nav { grid-template-columns: 1fr; }
+      .topbar { grid-template-columns: 1fr; }
+      .calendar { grid-template-columns: repeat(7, 1fr); }
+      .reader-card { padding: 16px; }
+      .chooser-card { padding: 16px; max-height: calc(100vh - 20px); }
+      .chooser-grid { grid-template-columns: 1fr; }
+      .chooser-footer { bottom: -16px; margin: 0 -16px -16px; padding: 12px 16px; }
+      .profile-summary { gap: 20px; }
+      .profile-stats { min-height: 90px; }
+      .profile-stat { padding: 0 10px; }
+      .profile-stat strong { font-size: 28px; }
+      .calendar-caption { align-items: flex-start; flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="modal" id="welcomeModal" role="dialog" aria-modal="true" aria-labelledby="welcomeTitle">
+    <div class="modal-card">
+      <span class="tag">给那些没有发出去的话</span>
+      <h2 id="welcomeTitle">那些没说出口的话，可以先放在这里。</h2>
+      <p>看完一场 TED，心里很亮，却说不出为什么。刷到一句话，明明想回应，最后还是退出了。电影结束后有很多感受，却只发了一个“好看”。</p>
+      <p>它们很有价值，只是还没遇到一个愿意慢慢听你说完的地方。</p>
+      <p>在声迹，你可以先留下一句话。AI 会记住你的足迹，陪你追问、整理、表达。也许有一天，它会变成一页思想、一次发言，或者只是一个更清楚的自己。</p>
+      <div class="actions">
+        <button class="primary" id="enterBtn">写下第一条足迹</button>
+        <button class="secondary" id="skipWelcomeBtn">先逛一逛</button>
+      </div>
+      <div class="modal-note">不用完整，不用正确，也不用立刻公开。</div>
+    </div>
+  </div>
+
+  <div class="modal reader-modal hidden" id="readerModal" role="dialog" aria-modal="true" aria-labelledby="readerTitle">
+    <div class="reader-card">
+      <div class="reader-header">
+        <strong id="readerTitle">阅读一页思想</strong>
+        <button class="secondary" id="closeReaderBtn">关闭</button>
+      </div>
+      <div class="tag-row" id="readerTags"></div>
+      <p class="reader-text" id="readerText"></p>
+      <div class="reader-footer">
+        <button class="mini" id="readerSameBtn">我也有过这个时刻</button>
+        <button class="mini" id="readerAskBtn">留下一个温和追问</button>
+        <button class="mini" id="readerCollectBtn">收藏到足迹</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal reader-modal hidden" id="footprintChooserModal" role="dialog" aria-modal="true" aria-labelledby="chooserTitle">
+    <div class="chooser-card">
+      <div class="chooser-header">
+        <div>
+          <h2 id="chooserTitle">带几条足迹进来</h2>
+          <p>选 1 到 3 条和这次表达最有关的足迹。它们会成为你继续说清的材料。</p>
+        </div>
+        <button class="secondary" id="closeChooserBtn">关闭</button>
+      </div>
+      <div class="chooser-filter" id="chooserFilters"></div>
+      <div class="chooser-grid" id="chooserGrid"></div>
+      <div class="chooser-footer">
+        <span id="chooserCount" class="draft-meta">已选 0 条</span>
+        <button class="primary" id="confirmFootprintsBtn">带入表达工坊</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal reader-modal hidden" id="profileEditorModal" role="dialog" aria-modal="true" aria-labelledby="profileEditorTitle">
+    <div class="profile-editor-card">
+      <div class="reader-header">
+        <h2 id="profileEditorTitle">编辑我的主页</h2>
+        <button class="secondary" id="closeProfileEditorBtn">关闭</button>
+      </div>
+      <div class="field">
+        <label for="profileNameInput">名字</label>
+        <input id="profileNameInput" maxlength="24" placeholder="写下你希望显示的名字">
+      </div>
+      <div class="field">
+        <label for="profileBioInput">主页介绍</label>
+        <textarea id="profileBioInput" maxlength="120" placeholder="用一句话写下最近的自己"></textarea>
+      </div>
+      <div class="actions">
+        <button class="primary" id="saveProfileBtn">保存主页</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <aside>
+      <div class="logo">
+        <h1>声迹 MyTalk</h1>
+        <p>把没有说出口的感受，慢慢变成可以被看见的思想。</p>
+      </div>
+      <nav class="nav" aria-label="主导航">
+        <button class="active" data-view="footprints"><span>1</span><span>足迹</span></button>
+        <button data-view="studio"><span>2</span><span>表达工坊</span></button>
+        <button data-view="library"><span>3</span><span>思想图书馆</span></button>
+        <button data-view="growth"><span>4</span><span>成长</span></button>
+      </nav>
+    </aside>
+
+    <main>
+      <section class="topbar">
+        <div>
+          <h2 id="pageTitle">今天，你有什么感想？</h2>
+          <p id="pageLead">那些一闪而过的细微感触，我们总有一天可以讲清楚。</p>
+        </div>
+      </section>
+
+      <section class="view active" id="footprints">
+        <div class="panel">
+          <h3 id="footprintEditorTitle">留下一个足迹</h3>
+          <p class="section-note">先记住一个瞬间。它可以只有一句话，之后再慢慢长成更清楚的表达。</p>
+          <div class="grid two" style="margin-top:14px;">
+            <div class="field">
+              <label for="triggerType">触发来源</label>
+              <input id="triggerType" value="看完 TED" placeholder="比如：刷到一条评论、看完 TED、电影散场后、和朋友聊天时">
+            </div>
+            <div class="field">
+              <label for="footprintTags">标签</label>
+              <input id="footprintTags" value="AI, 教育, 想反驳">
+            </div>
+          </div>
+          <div class="field" style="margin-top:14px;">
+            <label for="footprintText">先不用完整</label>
+            <textarea id="footprintText" placeholder="比如：我不喜欢别人说 AI 时代人就不用思考了，但我又不知道怎么反驳。"></textarea>
+          </div>
+          <div class="actions">
+            <button class="primary" id="addFootprintBtn">存入足迹</button>
+            <button class="secondary hidden" id="newFootprintBtn">新建一条</button>
+            <button class="secondary hidden" id="useEditingFootprintBtn">用这条进入表达工坊</button>
+            <button class="secondary" id="randomPromptBtn">给我一个引子</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <h3>我的足迹纸条</h3>
+          <div class="tag-row" id="tagFilters" style="margin:12px 0 14px;"></div>
+          <div class="footprint-board" id="footprintBoard"></div>
+        </div>
+
+        <div class="panel">
+          <h3>我收藏的足迹纸条</h3>
+          <p class="section-note">在思想图书馆读到、想留给以后的那些话，会放在这里。</p>
+          <div class="footprint-board" id="collectedFootprintBoard" style="margin-top:14px;"></div>
+        </div>
+      </section>
+
+      <section class="view" id="studio">
+        <div class="grid two growth-pair">
+          <div class="panel">
+            <h3>选择今天想说清的东西</h3>
+            <p class="section-note">你可以从一个已经成形的想法开始，也可以从一个还说不清的感受开始。</p>
+            <div class="grid" style="margin-top:14px;">
+              <div class="field">
+                <label for="studioSource">表达入口</label>
+                <select id="studioSource">
+                  <option value="feeling">我只有一个瞬间，还说不清</option>
+                  <option value="thought">我已经有一个想法</option>
+                  <option value="ted">把 TED 感受变成自己的话</option>
+                  <option value="reply">回应一个让我想反驳的观点</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="studioText">当前想法</label>
+                <textarea id="studioText">我想说清楚：AI 时代最重要的是更知道自己为什么要问。</textarea>
+              </div>
+              <div class="field">
+                <label for="formatSelect">输出形式</label>
+                <select id="formatSelect">
+                  <option value="一句话">一句话</option>
+                  <option value="一段话">一段话</option>
+                  <option value="1 分钟发言">1 分钟发言</option>
+                  <option value="3 分钟 My Talk">3 分钟 My Talk</option>
+                  <option value="5 分钟 My Talk">5 分钟 My Talk</option>
+                </select>
+              </div>
+            </div>
+            <div class="actions">
+              <button class="primary" id="startDialogueBtn">开始陪我说清</button>
+              <button class="secondary" id="pullFootprintsBtn">去选择足迹</button>
+            </div>
+            <p class="entry-hint" id="entryHint">从感受开始，先说清它让你停下来的地方。</p>
+          </div>
+
+          <div class="panel">
+            <h3>这次带来的足迹</h3>
+            <p>选几条和这次表达有关的记录。它们会帮助你把想法放回自己的生活里。</p>
+            <div id="selectedFootprints" class="grid" style="margin-top:14px;"></div>
+          </div>
+        </div>
+
+        <div class="panel hidden" id="dialoguePanel">
+          <h3>和 AI 把话说清</h3>
+          <div class="question-card" style="margin-top:14px;">
+            <div class="question-tabs" id="questionTabs"></div>
+            <div class="prompt" id="currentQuestion"></div>
+            <div class="field">
+              <label for="answerBox">你的回答</label>
+              <textarea id="answerBox" placeholder="不用很完整，真实一点就够了。"></textarea>
+            </div>
+            <div class="actions">
+              <button class="secondary" id="prevQuestionBtn">上一个问题</button>
+              <button class="primary" id="nextQuestionBtn">保存并继续</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel hidden" id="draftPanel">
+          <h3>我的表达草稿 <span class="draft-meta" id="draftMeta"></span></h3>
+          <div class="grid two" style="margin-top:14px;">
+            <div class="draft-card">
+              <div class="post-cover" id="draftCover">
+                <span class="tag">我的封面</span>
+                <h3 id="draftCoverTitle">一页新的思想</h3>
+                <p id="draftCoverClaim">我正在练习把一个感受说清楚。</p>
+              </div>
+              <div class="field">
+                <label for="draftTitle">标题</label>
+                <input id="draftTitle">
+              </div>
+              <div class="field">
+                <label for="draftClaim">核心观点</label>
+                <textarea id="draftClaim"></textarea>
+              </div>
+              <div class="field">
+                <label for="draftText">正文</label>
+                <textarea class="expression-output" id="draftText"></textarea>
+              </div>
+              <div class="actions">
+                <button class="primary" id="shareDraftBtn">分享到思想图书馆</button>
+                <button class="secondary" id="saveDraftFootprintBtn">存为足迹</button>
+              </div>
+            </div>
+            <div class="draft-card">
+              <h3>这次表达引用了</h3>
+              <div id="usedMaterial" class="grid"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="library">
+        <div class="panel">
+          <h3>思想图书馆</h3>
+          <p>先从一张封面认识一个想法，想继续读下去，再打开完整表达。</p>
+        </div>
+        <div class="grid three" id="libraryGrid"></div>
+      </section>
+
+      <section class="view" id="growth">
+        <div class="panel">
+          <div class="profile-summary">
+            <div>
+              <span class="tag violet">个人主页</span>
+              <h3 id="profileHeading" style="margin-top:10px;">Sever 的声迹</h3>
+              <p id="profileBio" style="margin-top:10px;">最近你常在想 AI、教育和表达焦虑。你的声音正在从“想反驳”走向“想说清”。</p>
+              <div class="profile-actions"><button class="secondary" id="editProfileBtn">编辑主页</button></div>
+            </div>
+            <div class="profile-stats" aria-label="我的表达记录">
+              <div class="profile-stat"><strong id="countFootprints">0</strong><span>足迹</span></div>
+              <div class="profile-stat"><strong id="countExpressions">0</strong><span>成稿</span></div>
+              <div class="profile-stat"><strong id="countShared">0</strong><span>分享</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid growth-pair">
+          <div class="panel">
+            <h3>表达日历</h3>
+            <p>每一次记录、追问、修改、发布，都会点亮一次。它更像你这段时间把自己说清楚的痕迹。</p>
+            <div class="calendar" id="calendar" style="margin-top:14px;"></div>
+            <div class="calendar-caption">
+              <span id="calendarTotal">过去 42 天，留下 0 次表达</span>
+              <span class="calendar-legend">少 <i></i><i></i><i></i><i></i> 多</span>
+            </div>
+          </div>
+          <div class="panel">
+            <h3>常出现的主题</h3>
+            <div class="tag-row" id="growthTags" style="margin-top:12px;"></div>
+          </div>
+        </div>
+
+        <section class="featured-section" aria-labelledby="featuredExpressionsTitle">
+          <h3 id="featuredExpressionsTitle">我的代表表达</h3>
+          <div class="grid featured-grid" id="featuredExpressions"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const state = {
+      view: "footprints",
+      activeTag: "全部",
+      editingFootprintId: null,
+      selectedIds: [1, 2],
+      questionIndex: 0,
+      answers: ["", "", ""],
+      expressions: 1,
+      shared: 0,
+      profile: {
+        name: "Sever",
+        bio: "最近你常在想 AI、教育和表达焦虑。你的声音正在从“想反驳”走向“想说清”。"
+      },
+      collectedFootprints: [],
+      activity: [0,1,0,2,0,1,3,0,0,1,2,0,1,0,1,1,0,2,3,0,1,0,0,2,1,0,1,3,0,1,0,2,1,0,1,2,0,0,1,2,3,0],
+      footprints: [
+        {
+          id: 1,
+          type: "想回应一条发言",
+          text: "我不喜欢别人说 AI 时代人就不用思考了。可是如果真的回到原贴争论，我又怕自己说不清，最后只是在吵架。",
+          tags: ["AI", "想反驳", "表达焦虑"],
+          stage: "fragment",
+          date: "今天"
+        },
+        {
+          id: 2,
+          type: "看完 TED",
+          text: "TED 里讲创造力是一种把普通经历重新连接的能力。我想到学校里很多时候只奖励标准答案。",
+          tags: ["TED", "创造力", "教育"],
+          stage: "opened",
+          date: "昨天"
+        },
+        {
+          id: 3,
+          type: "读书或电影之后",
+          text: "看完电影后最难忘的是主角终于承认自己害怕。好像表达也是先承认真实，再慢慢变强。",
+          tags: ["电影", "成长", "脆弱"],
+          stage: "fragment",
+          date: "3 天前"
+        }
+      ],
+      library: [
+        {
+          title: "我为什么仍然需要提出问题",
+          claim: "AI 时代最稀缺的是知道自己为什么要问的能力。",
+          text: "我曾经以为表达就是把一个答案说得更漂亮。后来我发现，真正让我停下来的，是我还没有问出自己的问题。TED 给了我一个入口，但生活里的迟疑、课堂里的标准答案、以及我没发出去的反驳，才让我知道这个观点为什么属于我。",
+          tags: ["AI", "教育"],
+          author: "同学 A",
+          same: 23,
+          ask: 6
+        },
+        {
+          title: "有些孤独，是没有被听完",
+          claim: "表达的价值在于让一个真实经验被完整听见。",
+          text: "我一直觉得自己有朋友，只是很少有人听我说完。后来我开始把那些没发出去的话写下来，才发现孤独有时来自没有一个空间允许我慢慢说。",
+          tags: ["孤独", "连接"],
+          author: "同学 B",
+          same: 31,
+          ask: 9
+        },
+        {
+          title: "我想把犹豫也算作成长的一部分",
+          claim: "犹豫有时是行动前最诚实的准备。",
+          text: "很多成长故事都喜欢讲一个人突然变勇敢。但我的经验不是这样。我的每一次改变，都先经过很长时间的犹豫。AI 问我的问题让我意识到，我有观点，只是还没有允许自己慢慢说。",
+          tags: ["女性成长", "自我"],
+          author: "同学 C",
+          same: 18,
+          ask: 5
+        }
+      ]
+    };
+
+    const prompts = [
+      "这件事让你真正不舒服、被打动或想继续追问的地方是什么？",
+      "如果把它放回你的生活里，它对应哪个具体场景？",
+      "你希望别人听完后，除了知道你的观点，还会重新想一想什么？"
+    ];
+
+    const randomPrompts = [
+      "今天有没有一句话让你想反驳，但你最后没有发出去？",
+      "最近看过的 TED、电影、书里，哪一个瞬间让你停了一下？",
+      "有没有一个你很想说清楚，却总觉得说不完整的观点？",
+      "最近一次开心、低落、感动或生气，是因为什么？"
+    ];
+
+    const questionSets = {
+      feeling: [
+        "哪个瞬间让你停了一下？你当时先感到什么？",
+        "把这个瞬间放回你的生活里，它发生在什么场景？",
+        "如果只留下一个小判断，你最想让别人知道什么？"
+      ],
+      thought: [
+        "你现在最想说清的判断是什么？哪一个词最重要？",
+        "你为什么会这样想？有没有一段经历支持它？",
+        "你希望别人听完后，重新想一想什么？"
+      ],
+      ted: [
+        "TED 里哪个观点让你赞同、迟疑或想反驳？",
+        "这个观点在你的课堂、家庭或社交生活里对应什么？",
+        "如果补充一个中国青年的视角，你最想补充哪一句？"
+      ],
+      reply: [
+        "那句话让你不舒服的具体地方是什么？",
+        "你曾经在哪个真实场景里遇到过相似的问题？",
+        "如果不争论输赢，你真正想把哪一点说清？"
+      ]
+    };
+
+    const viewMeta = {
+      footprints: ["今天，你有什么感想？", "那些一闪而过的细微感触，我们总有一天可以讲清楚。"],
+      studio: ["把一个念头说清楚", "我陪你追问、引用你的足迹，再把它整理成你愿意发出去的版本。"],
+      library: ["像读书一样读他人的观点", "在这里，表达会被温和地看见，也会成为别人继续思考的入口。"],
+      growth: ["看见自己正在形成的声音", "持续学习来自一次次把感受变成更清楚的表达。"]
+    };
+
+    const viewThemes = {
+      footprints: { deep: "#698e6a", pale: "#c9cfc1", paper: "#fbfbf4", accent: "#4f7657", ink: "#31483a", soft: "rgba(105, 142, 106, .16)", wash: "rgba(105, 142, 106, .13)" },
+      studio: { deep: "#012696", pale: "#a4e2c6", paper: "#f5fbf5", accent: "#012696", ink: "#10255e", soft: "rgba(164, 226, 198, .22)", wash: "rgba(130, 171, 204, .15)" },
+      library: { deep: "#82abcc", pale: "#f3bf4c", paper: "#fff9e8", accent: "#2f90b9", ink: "#31566d", soft: "rgba(243, 191, 76, .2)", wash: "rgba(130, 171, 204, .16)" },
+      growth: { deep: "#7c739f", pale: "#e5dfd5", paper: "#fbfaf6", accent: "#7c739f", ink: "#514d6d", soft: "rgba(124, 115, 159, .16)", wash: "rgba(124, 115, 159, .13)" }
+    };
+
+    const byId = id => document.getElementById(id);
+    const storageKey = "mytalk-studio-state-v3";
+    let readerIndex = null;
+    let chooserIds = [];
+    let chooserTag = "全部";
+
+    try {
+      const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
+      if (saved) Object.assign(state, saved);
+    } catch (error) {
+      console.info("本地演示数据读取失败，将使用示例数据。", error);
+    }
+
+    state.footprints = state.footprints.map(item => ({ ...item, stage: item.stage || "fragment" }));
+    state.library = state.library.map((item, index) => ({ ...item, id: item.id || index + 1 }));
+    state.selectedIds = [...new Set(state.selectedIds || [])].slice(0, 3);
+    state.profile = { name: "Sever", bio: "最近你常在想 AI、教育和表达焦虑。你的声音正在从“想反驳”走向“想说清”。", ...(state.profile || {}) };
+    state.collectedFootprints = Array.isArray(state.collectedFootprints) ? state.collectedFootprints : [];
+
+    function persistState() {
+      try {
+        localStorage.setItem(storageKey, JSON.stringify({
+          activeTag: state.activeTag,
+          selectedIds: state.selectedIds,
+          expressions: state.expressions,
+          shared: state.shared,
+          profile: state.profile,
+          collectedFootprints: state.collectedFootprints,
+          activity: state.activity,
+          footprints: state.footprints,
+          library: state.library
+        }));
+      } catch (error) {
+        console.info("本地演示数据保存失败。", error);
+      }
+    }
+
+    function currentPrompts() {
+      return questionSets[byId("studioSource").value] || questionSets.feeling;
+    }
+
+    function updateEntryHint() {
+      const hints = {
+        feeling: "从感受开始，先说清它让你停下来的地方。",
+        thought: "从判断开始，陪你找到它背后的经历和证据。",
+        ted: "从 TED 的一个观点出发，把它放回你的生活。",
+        reply: "从想回应的一句话开始，把情绪变成可以被听见的表达。"
+      };
+      byId("entryHint").textContent = hints[byId("studioSource").value] || hints.feeling;
+    }
+
+    function stageLabel(stage) {
+      return { fragment: "碎片", opened: "展开中", draft: "成稿" }[stage] || "碎片";
+    }
+
+    function fitTextarea(textarea, minimum = 48, maximum = 560) {
+      if (!textarea) return;
+      textarea.style.height = "auto";
+      const nextHeight = Math.min(Math.max(textarea.scrollHeight, minimum), maximum);
+      textarea.style.height = `${nextHeight}px`;
+      textarea.style.overflowY = textarea.scrollHeight > maximum ? "auto" : "hidden";
+    }
+
+    function fitDraftFields() {
+      fitTextarea(byId("draftClaim"), 72, 220);
+      fitTextarea(byId("draftText"), 120, 560);
+    }
+
+    function renderFootprintChooser() {
+      const tags = ["全部", ...new Set(state.footprints.flatMap(item => item.tags))];
+      const items = chooserTag === "全部" ? state.footprints : state.footprints.filter(item => item.tags.includes(chooserTag));
+      byId("chooserFilters").innerHTML = tags.map(tag => `<button class="tag filter ${chooserTag === tag ? "active" : ""}" data-chooser-filter="${escapeAttr(tag)}">${escapeHtml(tag)}</button>`).join("");
+      byId("chooserGrid").innerHTML = items.map(item => `
+        <button class="chooser-note ${chooserIds.includes(item.id) ? "selected" : ""}" data-chooser-note="${item.id}" aria-pressed="${chooserIds.includes(item.id)}">
+          <div class="note-meta">
+            <span>${escapeHtml(item.type)} · ${escapeHtml(item.date)}</span>
+            <span class="stage ${escapeAttr(item.stage)}">${stageLabel(item.stage)}</span>
+          </div>
+          <p>${escapeHtml(item.text)}</p>
+          <div class="tag-row">${item.tags.map(tag => `<span class="tag ${colorClass(tag)}">${escapeHtml(tag)}</span>`).join("")}</div>
+        </button>
+      `).join("") || `<div class="empty">这个标签下还没有足迹。</div>`;
+      byId("chooserCount").textContent = `已选 ${chooserIds.length} 条${chooserIds.length ? " · 最多 3 条" : ""}`;
+      byId("confirmFootprintsBtn").textContent = chooserIds.length ? `带入 ${chooserIds.length} 条足迹` : "暂不带入，继续表达";
+
+      document.querySelectorAll("[data-chooser-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          chooserTag = button.dataset.chooserFilter;
+          renderFootprintChooser();
+        });
+      });
+
+      document.querySelectorAll("[data-chooser-note]").forEach(button => {
+        button.addEventListener("click", () => {
+          const id = Number(button.dataset.chooserNote);
+          if (chooserIds.includes(id)) {
+            chooserIds = chooserIds.filter(selectedId => selectedId !== id);
+          } else if (chooserIds.length < 3) {
+            chooserIds = [...chooserIds, id];
+          }
+          renderFootprintChooser();
+        });
+      });
+    }
+
+    function openFootprintChooser() {
+      chooserIds = [...state.selectedIds].slice(0, 3);
+      chooserTag = "全部";
+      renderFootprintChooser();
+      byId("footprintChooserModal").classList.remove("hidden");
+    }
+
+    function closeFootprintChooser() {
+      byId("footprintChooserModal").classList.add("hidden");
+    }
+
+    function showView(id) {
+      state.view = id;
+      applyViewTheme(id);
+      document.querySelectorAll(".view").forEach(view => view.classList.toggle("active", view.id === id));
+      document.querySelectorAll(".nav button").forEach(button => button.classList.toggle("active", button.dataset.view === id));
+      byId("pageTitle").textContent = viewMeta[id][0];
+      byId("pageLead").textContent = viewMeta[id][1];
+      byId("pageLead").classList.toggle("hidden", !viewMeta[id][1]);
+      if (id === "studio") updateEntryHint();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function applyViewTheme(id) {
+      const theme = viewThemes[id] || viewThemes.footprints;
+      const root = document.documentElement.style;
+      root.setProperty("--view-deep", theme.deep);
+      root.setProperty("--view-pale", theme.pale);
+      root.setProperty("--view-paper", theme.paper);
+      root.setProperty("--view-accent", theme.accent);
+      root.setProperty("--view-ink", theme.ink);
+      root.setProperty("--view-soft", theme.soft);
+      root.setProperty("--view-wash", theme.wash);
+    }
+
+    function parseTags(value) {
+      return value.split(/[,，、\s]+/).map(tag => tag.trim()).filter(Boolean).slice(0, 5);
+    }
+
+    function colorClass(tag) {
+      if (/想反驳|焦虑|低落|脆弱/.test(tag)) return "red";
+      if (/TED|电影|创造力/.test(tag)) return "orange";
+      if (/AI|教育/.test(tag)) return "green";
+      if (/女性|自我|成长/.test(tag)) return "violet";
+      if (/孤独|连接|图书馆/.test(tag)) return "blue";
+      return "";
+    }
+
+    function renderTags() {
+      const tags = ["全部", ...new Set(state.footprints.flatMap(item => item.tags))];
+      byId("tagFilters").innerHTML = tags.map(tag => `<button class="tag filter ${state.activeTag === tag ? "active" : ""}" data-filter="${escapeAttr(tag)}">${escapeHtml(tag)}</button>`).join("");
+      document.querySelectorAll("[data-filter]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.activeTag = button.dataset.filter;
+          renderFootprints();
+        });
+      });
+    }
+
+    function renderFootprints() {
+      renderTags();
+      const items = state.activeTag === "全部" ? state.footprints : state.footprints.filter(item => item.tags.includes(state.activeTag));
+      byId("footprintBoard").innerHTML = items.map(item => `
+        <article class="note ${state.editingFootprintId === item.id ? "editing" : ""}" data-note="${item.id}">
+          <div class="note-top">
+            <div class="note-meta">
+              <span>${escapeHtml(item.type)}</span>
+              <span>${escapeHtml(item.date)}</span>
+            </div>
+            <span class="stage ${escapeAttr(item.stage)}">${stageLabel(item.stage)}</span>
+          </div>
+          <textarea data-note-text="${item.id}">${escapeHtml(item.text)}</textarea>
+          <input data-note-tags="${item.id}" value="${escapeAttr(item.tags.join(", "))}">
+          <div class="tag-row">${item.tags.map(tag => `<span class="tag ${colorClass(tag)}">${escapeHtml(tag)}</span>`).join("")}</div>
+          <div class="note-actions">
+            <button class="mini" data-edit-note="${item.id}">编辑</button>
+            <button class="mini" data-open-note="${item.id}">${item.stage === "fragment" ? "继续说清" : "继续表达"}</button>
+          </div>
+        </article>
+      `).join("") || `<div class="empty">这个标签下还没有足迹。</div>`;
+
+      document.querySelectorAll("[data-note-text]").forEach(input => {
+        fitTextarea(input, 48, 220);
+        input.addEventListener("input", () => {
+          const item = findFootprint(Number(input.dataset.noteText));
+          item.text = input.value;
+          item.stage = item.stage === "fragment" && input.value.trim().length > 80 ? "opened" : item.stage;
+          fitTextarea(input, 48, 220);
+          persistState();
+          renderSelectedFootprints();
+        });
+      });
+
+      document.querySelectorAll("[data-note-tags]").forEach(input => {
+        input.addEventListener("change", () => {
+          const item = findFootprint(Number(input.dataset.noteTags));
+          item.tags = parseTags(input.value);
+          persistState();
+          renderAll();
+        });
+      });
+
+      document.querySelectorAll("[data-edit-note]").forEach(button => {
+        button.addEventListener("click", () => loadFootprintIntoEditor(Number(button.dataset.editNote)));
+      });
+
+      document.querySelectorAll("[data-open-note]").forEach(button => {
+        button.addEventListener("click", () => {
+          const id = Number(button.dataset.openNote);
+          const item = findFootprint(id);
+          if (!item) return;
+          state.selectedIds = [id, ...state.selectedIds.filter(selectedId => selectedId !== id)].slice(0, 3);
+          byId("studioText").value = `我想说清楚：${item.text.split(/[。！？!?]/)[0]}。`;
+          showView("studio");
+          persistState();
+        });
+      });
+    }
+
+    function renderCollectedFootprints() {
+      byId("collectedFootprintBoard").innerHTML = state.collectedFootprints.map(item => `
+        <article class="collected-note">
+          <div class="note-meta"><span>来自 ${escapeHtml(item.author)}</span><span>${escapeHtml(item.date)}</span></div>
+          <p>${escapeHtml(item.claim)}</p>
+          <div class="tag-row">${item.tags.map(tag => `<span class="tag ${colorClass(tag)}">${escapeHtml(tag)}</span>`).join("")}</div>
+          <div class="note-actions">
+            <button class="mini" data-use-collected="${item.id}">带去表达工坊</button>
+            <button class="mini" data-remove-collected="${item.id}">移除收藏</button>
+          </div>
+        </article>
+      `).join("") || `<div class="empty">你还没有收藏足迹纸条。去思想图书馆留下一句想带走的话吧。</div>`;
+
+      document.querySelectorAll("[data-use-collected]").forEach(button => {
+        button.addEventListener("click", () => {
+          const item = state.collectedFootprints.find(collected => collected.id === Number(button.dataset.useCollected));
+          if (!item) return;
+          byId("studioText").value = `我想说清楚：${item.claim}`;
+          showView("studio");
+        });
+      });
+
+      document.querySelectorAll("[data-remove-collected]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.collectedFootprints = state.collectedFootprints.filter(item => item.id !== Number(button.dataset.removeCollected));
+          persistState();
+          renderCollectedFootprints();
+        });
+      });
+    }
+
+    function collectLibraryFootprint(item) {
+      const id = item.id || state.library.indexOf(item) + 1;
+      if (state.collectedFootprints.some(collected => collected.id === id)) return false;
+      state.collectedFootprints.unshift({
+        id,
+        author: item.author,
+        claim: item.claim,
+        tags: item.tags,
+        date: "刚刚收藏"
+      });
+      persistState();
+      renderCollectedFootprints();
+      return true;
+    }
+
+    function findFootprint(id) {
+      return state.footprints.find(item => item.id === id);
+    }
+
+    function loadFootprintIntoEditor(id) {
+      const item = findFootprint(id);
+      if (!item) return;
+      state.editingFootprintId = id;
+      byId("triggerType").value = item.type;
+      byId("footprintText").value = item.text;
+      byId("footprintTags").value = item.tags.join(", ");
+      byId("footprintEditorTitle").textContent = "编辑这条足迹";
+      byId("addFootprintBtn").textContent = "更新足迹";
+      byId("newFootprintBtn").classList.remove("hidden");
+      byId("useEditingFootprintBtn").classList.remove("hidden");
+      byId("randomPromptBtn").classList.add("hidden");
+      document.querySelectorAll(".note").forEach(note => note.classList.toggle("selected", Number(note.dataset.note) === id));
+      byId("triggerType").focus();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function resetFootprintEditor() {
+      state.editingFootprintId = null;
+      byId("triggerType").value = "看完 TED";
+      byId("footprintText").value = "";
+      byId("footprintTags").value = "AI, 教育, 想反驳";
+      byId("footprintEditorTitle").textContent = "留下一个足迹";
+      byId("addFootprintBtn").textContent = "存入足迹";
+      byId("newFootprintBtn").classList.add("hidden");
+      byId("useEditingFootprintBtn").classList.add("hidden");
+      byId("randomPromptBtn").classList.remove("hidden");
+      renderFootprints();
+    }
+
+    function updateFootprint(id, text, tags, type) {
+      const item = findFootprint(id);
+      if (!item) return;
+      item.text = text;
+      item.tags = tags;
+      item.type = type;
+      item.stage = item.stage === "draft" ? "draft" : text.length > 80 ? "opened" : "fragment";
+      item.date = item.date === "刚刚" ? "刚刚" : `${item.date} · 已修改`;
+      addActivity(1);
+      renderAll();
+    }
+
+    function selectedFootprints() {
+      return state.selectedIds.map(findFootprint).filter(Boolean);
+    }
+
+    function renderSelectedFootprints() {
+      const selected = selectedFootprints();
+      byId("selectedFootprints").innerHTML = selected.length
+        ? selected.map(item => `<div class="quote selected-material"><div><span class="stage ${escapeAttr(item.stage)}">${stageLabel(item.stage)}</span><div style="margin-top:8px;">${escapeHtml(item.text)}</div><div class="tag-row" style="margin-top:8px;">${item.tags.map(tag => `<span class="tag ${colorClass(tag)}">${escapeHtml(tag)}</span>`).join("")}</div></div><button class="mini" data-remove-selected="${item.id}">移除</button></div>`).join("")
+        : `<div class="empty">还没有带入足迹。点击“去选择足迹”，从你的记录里带几条进来。</div>`;
+
+      document.querySelectorAll("[data-remove-selected]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.selectedIds = state.selectedIds.filter(id => id !== Number(button.dataset.removeSelected));
+          persistState();
+          renderSelectedFootprints();
+        });
+      });
+    }
+
+    function addActivity(amount = 1) {
+      state.activity[state.activity.length - 1] = Math.min(3, state.activity[state.activity.length - 1] + amount);
+      persistState();
+      renderCalendar();
+      renderGrowth();
+    }
+
+    function renderCalendar() {
+      byId("calendar").innerHTML = state.activity.map((value, index) => `<span class="day ${value ? `lv${value}` : ""}" aria-label="第 ${index + 1} 天，表达 ${value} 次"></span>`).join("");
+      const total = state.activity.reduce((sum, value) => sum + value, 0);
+      byId("calendarTotal").textContent = `过去 ${state.activity.length} 天，留下 ${total} 次表达`;
+    }
+
+    function renderFeaturedExpressions() {
+      const list = state.library.slice(0, 3);
+      byId("featuredExpressions").innerHTML = list.map((item, index) => `
+        <article class="library-card">
+          <button class="post-cover cover-button" data-featured-read="${index}" aria-label="阅读：${escapeAttr(item.title)}">
+            <span class="tag">${escapeHtml(item.author)}</span>
+            <span class="cover-title">${escapeHtml(item.title)}</span>
+            <p>${escapeHtml(item.claim)}</p>
+          </button>
+          <p class="post-snippet">${escapeHtml(item.text.slice(0, 130))}${item.text.length > 130 ? "…" : ""}</p>
+          <div class="post-meta">
+            <span>${item.same + item.ask} 次回应</span>
+            <span>${item.tags.slice(0, 2).map(tag => escapeHtml(tag)).join(" · ")}</span>
+          </div>
+        </article>
+      `).join("");
+
+      document.querySelectorAll("[data-featured-read]").forEach(button => {
+        button.addEventListener("click", () => openReader(Number(button.dataset.featuredRead)));
+      });
+    }
+
+    function renderQuestions() {
+      const promptsForPath = currentPrompts();
+      byId("questionTabs").innerHTML = promptsForPath.map((_, index) => `<button class="qtab ${state.questionIndex === index ? "active" : ""} ${state.answers[index] ? "done" : ""}" data-q="${index}">问题 ${index + 1}</button>`).join("");
+      byId("currentQuestion").textContent = promptsForPath[state.questionIndex];
+      byId("answerBox").value = state.answers[state.questionIndex] || "";
+      byId("prevQuestionBtn").disabled = state.questionIndex === 0;
+      byId("nextQuestionBtn").textContent = state.questionIndex === promptsForPath.length - 1 ? "整理成表达" : "保存并继续";
+      document.querySelectorAll("[data-q]").forEach(button => {
+        button.addEventListener("click", () => {
+          saveAnswer();
+          state.questionIndex = Number(button.dataset.q);
+          renderQuestions();
+        });
+      });
+    }
+
+    function saveAnswer() {
+      state.answers[state.questionIndex] = byId("answerBox").value.trim();
+      persistState();
+    }
+
+    function generateExpression(recordActivity = true) {
+      saveAnswer();
+      const source = byId("studioText").value.trim() || "我想说清一个还没有完整成形的想法。";
+      const selected = selectedFootprints();
+      const remembered = selected.length ? selected : state.footprints.slice(0, 2);
+      const tags = [...new Set(remembered.flatMap(item => item.tags))];
+      const a0 = state.answers[0] || "它让我意识到，表达可以先从一个真实感受开始";
+      const a1 = state.answers[1] || remembered[0]?.text || "它和我的生活经验有关";
+      const a2 = state.answers[2] || "我希望别人也能想一想，自己是否也有类似的没有说出口的时刻";
+      const claim = source.replace(/^我想说清楚[:：]\s*/, "");
+      const format = byId("formatSelect").value;
+
+      byId("draftTitle").value = titleFromClaim(claim, tags);
+      byId("draftClaim").value = claim;
+      byId("draftText").value = buildDraftText(format, claim, a0, a1, a2, remembered);
+      byId("draftCoverTitle").textContent = byId("draftTitle").value;
+      byId("draftCoverClaim").textContent = claim.length > 48 ? `${claim.slice(0, 48)}…` : claim;
+      byId("usedMaterial").innerHTML = remembered.map(item => `<div class="quote">${escapeHtml(item.text)}</div>`).join("");
+      byId("draftPanel").classList.remove("hidden");
+      fitDraftFields();
+      updateDraftMeta();
+      if (recordActivity) {
+        state.expressions += 1;
+        addActivity(1);
+      } else {
+        persistState();
+      }
+    }
+
+    function updateDraftMeta() {
+      const format = byId("formatSelect").value;
+      const length = byId("draftText").value.trim().length;
+      const estimate = format.includes("分钟") ? `约 ${format.split(" ")[0]} 分钟` : `${length} 字`;
+      byId("draftMeta").textContent = `· ${format} · ${estimate}`;
+    }
+
+    function titleFromClaim(claim, tags) {
+      if (/AI|答案|问题/.test(claim)) return "我为什么仍然需要提出问题";
+      if (tags.includes("孤独")) return "有些话，终于被我说完";
+      if (tags.includes("成长") || tags.includes("女性成长")) return "把犹豫也算作成长";
+      return "把一个没有说出口的想法说清楚";
+    }
+
+    function buildDraftText(format, claim, a0, a1, a2, remembered) {
+      const memoryLine = remembered.map(item => `我曾经记录过：“${item.text}”`).join("\n");
+      if (format === "一句话") {
+        return claim;
+      }
+      if (format === "一段话") {
+        return `我今天想说的是：${claim}。这个想法从${a0}开始，也和我的生活有关：${a1}。我还没有把它说得很完整，但我想先留下这个问题：${a2}。`;
+      }
+      if (format === "1 分钟发言") {
+        return `大家好，我今天想说的观点是：${claim}。\n\n这个想法从一个具体的感受开始：${a0}。它让我想到自己的生活：${a1}。过去我常常以为，表达需要先准备好一个完整、漂亮、不会出错的答案，所以很多想说的话停在了心里。\n\n但这一次，我想先把问题留下来：${a2}。也许表达的第一步，只是允许自己把真实的想法说出来。`;
+      }
+      if (format === "3 分钟 My Talk") {
+        return `开场\n我想从一个没有发出去的念头讲起。它并不宏大，甚至有一点犹豫：${a0}。可是正是这个没有说出口的瞬间，让我意识到，我其实很想把一件事讲清楚。\n\n我的观点\n${claim}。我过去常常把表达想成一次交卷，仿佛只有观点完整、语言漂亮，才值得被别人听见。于是，很多真实的感受只停留在“我好像不同意”或“这让我很难受”这里。\n\n它和我的生活\n${a1}。${memoryLine}。这些片段让我发现，一个公共议题只有回到自己的生活里，才真正开始和我发生关系。课堂里的标准答案、社交平台上没有发出的回应、还有我对自己保持冷静的要求，都在影响我怎样理解这个观点。\n\n结尾\n${a2}。我还没有得到一个能够解决所有问题的答案，但我愿意把这个小小的判断继续带在身上，也愿意听听别人怎样理解它。`;
+      }
+      return `开场\n我想从一个没有发出去的念头讲起。那一刻，我先感到的是：${a0}。它没有立刻变成一个清楚的观点，却一直留在我心里，提醒我还有什么没有说完。\n\n第一部分：我正在形成的判断\n${claim}。我曾经以为，表达就是把答案说得更漂亮。后来我慢慢发现，真正重要的往往是先承认自己正在困惑、犹豫，或者和周围的声音不一样。只有承认这一点，我才有机会知道自己到底在想什么。\n\n第二部分：观点从哪里来\n${a1}。这不是一个脱离生活的抽象问题。${memoryLine}。这些足迹让我重新看见那些平常的场景：一次课堂讨论、一条没有回应的评论、一场电影散场后的沉默。它们没有马上给我答案，却把问题留在了我的生活里。\n\n第三部分：我怎样理解它\n我现在更愿意把表达看成一次共同整理。有人提出一个观点，我带着自己的经历去接近它，也保留不完全同意的部分。${a0}。这种迟疑不一定意味着我没有想法，它也可能是我在认真确认这句话是否真的属于我。\n\n结尾\n${a2}。我希望自己以后仍然愿意为一个小小的感受留出时间，把它从模糊的情绪变成可以被听见的语言。也许一次表达改变不了什么，但它会让我更清楚地知道，我正在关心什么，也正在成为怎样的人。`;
+    }
+
+    function renderLibrary() {
+      byId("libraryGrid").innerHTML = state.library.map((item, index) => `
+        <article class="library-card">
+          <button class="post-cover cover-button" data-read="${index}" aria-label="阅读：${escapeAttr(item.title)}">
+            <span class="tag">${escapeHtml(item.author)}</span>
+            <span class="cover-title">${escapeHtml(item.title)}</span>
+            <p>${escapeHtml(item.claim)}</p>
+          </button>
+          <p class="post-snippet">${escapeHtml(item.text.slice(0, 120))}${item.text.length > 120 ? "…" : ""}</p>
+          <div class="tag-row">${item.tags.map(tag => `<span class="tag ${colorClass(tag)}">${escapeHtml(tag)}</span>`).join("")}</div>
+          <div class="post-meta">
+            <span>${item.same} 认同</span>
+            <span>${item.ask} 追问</span>
+          </div>
+          <div class="actions">
+            <button class="mini" data-same="${index}">我也有过 ${item.same}</button>
+            <button class="mini" data-ask="${index}">温和追问 ${item.ask}</button>
+            <button class="mini" data-collect="${index}">收藏到足迹</button>
+          </div>
+        </article>
+      `).join("");
+
+      document.querySelectorAll("[data-same]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.library[Number(button.dataset.same)].same += 1;
+          persistState();
+          renderLibrary();
+        });
+      });
+      document.querySelectorAll("[data-ask]").forEach(button => {
+        button.addEventListener("click", () => {
+          state.library[Number(button.dataset.ask)].ask += 1;
+          persistState();
+          renderLibrary();
+        });
+      });
+      document.querySelectorAll("[data-collect]").forEach(button => {
+        button.addEventListener("click", () => {
+          const item = state.library[Number(button.dataset.collect)];
+          collectLibraryFootprint(item);
+          showView("footprints");
+        });
+      });
+      document.querySelectorAll("[data-read]").forEach(button => {
+        button.addEventListener("click", () => openReader(Number(button.dataset.read)));
+      });
+    }
+
+    function openReader(index) {
+      const item = state.library[index];
+      if (!item) return;
+      readerIndex = index;
+      byId("readerTitle").textContent = item.title;
+      byId("readerTags").innerHTML = `<span class="tag">${escapeHtml(item.author)}</span>${item.tags.map(tag => `<span class="tag ${colorClass(tag)}">${escapeHtml(tag)}</span>`).join("")}`;
+      byId("readerText").textContent = `${item.claim}\n\n${item.text}`;
+      byId("readerSameBtn").textContent = `我也有过这个时刻 · ${item.same}`;
+      byId("readerAskBtn").textContent = `留下一个温和追问 · ${item.ask}`;
+      byId("readerModal").classList.remove("hidden");
+    }
+
+    function closeReader() {
+      readerIndex = null;
+      byId("readerModal").classList.add("hidden");
+    }
+
+    function renderGrowth() {
+      byId("profileHeading").textContent = `${state.profile.name} 的声迹`;
+      byId("profileBio").textContent = state.profile.bio;
+      byId("countFootprints").textContent = state.footprints.length;
+      byId("countExpressions").textContent = state.expressions;
+      byId("countShared").textContent = state.shared;
+      const counts = {};
+      state.footprints.flatMap(item => item.tags).forEach(tag => counts[tag] = (counts[tag] || 0) + 1);
+      const tags = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 8);
+      byId("growthTags").innerHTML = tags.map(([tag, count]) => `<span class="tag ${colorClass(tag)}">${escapeHtml(tag)} ${count}</span>`).join("");
+    }
+
+    function openProfileEditor() {
+      byId("profileNameInput").value = state.profile.name;
+      byId("profileBioInput").value = state.profile.bio;
+      byId("profileEditorModal").classList.remove("hidden");
+      byId("profileNameInput").focus();
+    }
+
+    function closeProfileEditor() {
+      byId("profileEditorModal").classList.add("hidden");
+    }
+
+    function addFootprint(text, tags, type) {
+      const id = Math.max(0, ...state.footprints.map(item => item.id)) + 1;
+      state.footprints.unshift({ id, type, text, tags, date: "刚刚" });
+      state.footprints[0].stage = text.length > 80 ? "opened" : "fragment";
+      state.selectedIds = [id, ...state.selectedIds].slice(0, 3);
+      state.editingFootprintId = null;
+      addActivity(1);
+      renderAll();
+    }
+
+    function renderAll() {
+      renderFootprints();
+      renderCollectedFootprints();
+      renderSelectedFootprints();
+      renderCalendar();
+      renderLibrary();
+      renderFeaturedExpressions();
+      renderGrowth();
+      persistState();
+    }
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function escapeAttr(text) {
+      return escapeHtml(text).replace(/\n/g, " ");
+    }
+
+    document.querySelectorAll("[data-view]").forEach(button => {
+      button.addEventListener("click", () => showView(button.dataset.view));
+    });
+
+    document.querySelectorAll("[data-view-jump]").forEach(button => {
+      button.addEventListener("click", () => showView(button.dataset.viewJump));
+    });
+
+    byId("enterBtn").addEventListener("click", () => byId("welcomeModal").classList.add("hidden"));
+    byId("skipWelcomeBtn").addEventListener("click", () => byId("welcomeModal").classList.add("hidden"));
+
+    byId("randomPromptBtn").addEventListener("click", () => {
+      byId("footprintText").value = randomPrompts[Math.floor(Math.random() * randomPrompts.length)];
+    });
+
+    byId("addFootprintBtn").addEventListener("click", () => {
+      const text = byId("footprintText").value.trim();
+      if (!text) {
+        byId("footprintText").focus();
+        return;
+      }
+      const tags = parseTags(byId("footprintTags").value);
+      const type = byId("triggerType").value.trim() || "一个没有命名的瞬间";
+      if (state.editingFootprintId) {
+        updateFootprint(state.editingFootprintId, text, tags, type);
+      } else {
+        addFootprint(text, tags, type);
+      }
+      resetFootprintEditor();
+    });
+
+    byId("newFootprintBtn").addEventListener("click", resetFootprintEditor);
+
+    byId("useEditingFootprintBtn").addEventListener("click", () => {
+      if (!state.editingFootprintId) return;
+      if (!state.selectedIds.includes(state.editingFootprintId)) {
+        state.selectedIds = [state.editingFootprintId, ...state.selectedIds].slice(0, 3);
+      }
+      const item = findFootprint(state.editingFootprintId);
+      if (item) byId("studioText").value = `我想说清楚：${item.text.split(/[。！？!?]/)[0]}。`;
+      showView("studio");
+      renderSelectedFootprints();
+      persistState();
+    });
+
+    byId("pullFootprintsBtn").addEventListener("click", openFootprintChooser);
+
+    byId("closeChooserBtn").addEventListener("click", closeFootprintChooser);
+    byId("footprintChooserModal").addEventListener("click", event => {
+      if (event.target === byId("footprintChooserModal")) closeFootprintChooser();
+    });
+
+    byId("confirmFootprintsBtn").addEventListener("click", () => {
+      state.selectedIds = [...chooserIds];
+      const selected = selectedFootprints();
+      if (selected.length) {
+        byId("studioText").value = `我想说清楚：${selected[0].text.split(/[。！？!?]/)[0]}。`;
+      }
+      persistState();
+      renderSelectedFootprints();
+      closeFootprintChooser();
+    });
+
+    byId("startDialogueBtn").addEventListener("click", () => {
+      state.questionIndex = 0;
+      state.answers = ["", "", ""];
+      byId("dialoguePanel").classList.remove("hidden");
+      byId("draftPanel").classList.add("hidden");
+      renderQuestions();
+      addActivity(1);
+    });
+
+    byId("prevQuestionBtn").addEventListener("click", () => {
+      saveAnswer();
+      state.questionIndex = Math.max(0, state.questionIndex - 1);
+      renderQuestions();
+    });
+
+    byId("nextQuestionBtn").addEventListener("click", () => {
+      saveAnswer();
+      if (state.questionIndex >= currentPrompts().length - 1) {
+        generateExpression();
+      } else {
+        state.questionIndex += 1;
+        renderQuestions();
+      }
+    });
+
+    byId("shareDraftBtn").addEventListener("click", () => {
+      const remembered = selectedFootprints();
+      const tags = [...new Set(remembered.flatMap(item => item.tags))].slice(0, 3);
+      state.library.unshift({
+        id: Math.max(0, ...state.library.map(item => item.id || 0)) + 1,
+        title: byId("draftTitle").value.trim() || "一页新的思想",
+        claim: byId("draftClaim").value.trim() || "我正在练习把一个感受说清楚。",
+        text: byId("draftText").value.trim(),
+        tags: tags.length ? tags : ["MyTalk"],
+        author: "我",
+        same: 0,
+        ask: 0
+      });
+      state.shared += 1;
+      addActivity(1);
+      renderAll();
+      showView("library");
+    });
+
+    byId("saveDraftFootprintBtn").addEventListener("click", () => {
+      const text = byId("draftClaim").value.trim() || byId("draftText").value.trim();
+      addFootprint(text, ["成稿", "可继续"], "表达工坊");
+      state.footprints[0].stage = "draft";
+      persistState();
+      showView("footprints");
+    });
+
+    byId("studioSource").addEventListener("change", () => {
+      state.questionIndex = 0;
+      state.answers = ["", "", ""];
+      updateEntryHint();
+      if (!byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
+    });
+
+    byId("formatSelect").addEventListener("change", () => {
+      if (!byId("draftPanel").classList.contains("hidden")) {
+        generateExpression(false);
+      }
+    });
+
+    byId("draftClaim").addEventListener("input", () => fitTextarea(byId("draftClaim"), 72, 220));
+    byId("draftText").addEventListener("input", () => fitTextarea(byId("draftText"), 120, 560));
+
+    byId("closeReaderBtn").addEventListener("click", closeReader);
+    byId("readerModal").addEventListener("click", event => {
+      if (event.target === byId("readerModal")) closeReader();
+    });
+
+    byId("readerSameBtn").addEventListener("click", () => {
+      if (readerIndex === null) return;
+      state.library[readerIndex].same += 1;
+      persistState();
+      openReader(readerIndex);
+      renderLibrary();
+    });
+
+    byId("readerAskBtn").addEventListener("click", () => {
+      if (readerIndex === null) return;
+      state.library[readerIndex].ask += 1;
+      persistState();
+      openReader(readerIndex);
+      renderLibrary();
+    });
+
+    byId("readerCollectBtn").addEventListener("click", () => {
+      if (readerIndex === null) return;
+      const item = state.library[readerIndex];
+      collectLibraryFootprint(item);
+      closeReader();
+      showView("footprints");
+    });
+
+    byId("editProfileBtn").addEventListener("click", openProfileEditor);
+    byId("closeProfileEditorBtn").addEventListener("click", closeProfileEditor);
+    byId("profileEditorModal").addEventListener("click", event => {
+      if (event.target === byId("profileEditorModal")) closeProfileEditor();
+    });
+    byId("saveProfileBtn").addEventListener("click", () => {
+      const name = byId("profileNameInput").value.trim();
+      const bio = byId("profileBioInput").value.trim();
+      state.profile.name = name || "Sever";
+      state.profile.bio = bio || "这里会慢慢留下我正在形成的声音。";
+      persistState();
+      renderGrowth();
+      closeProfileEditor();
+    });
+
+    renderAll();
+    applyViewTheme(state.view);
+    updateEntryHint();
+  </script>
+</body>
+</html>
