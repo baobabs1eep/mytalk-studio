@@ -1,34 +1,30 @@
 # MyTalk Studio
 
-> From TED Talk to My Talk
+> 从 TED Talk 到 My Talk
 
-MyTalk Studio is an AI-supported expression-growth prototype for the New Channel TED challenge. It helps young people turn an idea sparked by a TED Talk, a film, a book, or everyday life into an expression that is genuinely their own.
+MyTalk Studio 是一个面向新航道 TED 企业命题的 AI 表达成长产品原型。它帮助年轻人将来自 TED、电影、书籍和日常生活的感触，慢慢发展为真正属于自己的表达。
 
-## Core idea
+## 核心想法
 
-TED is an entry point to high-quality ideas. MyTalk Studio connects those ideas with the user's personal experiences, then supports them as they record a thought, develop it into an expression, share it with others, and see their growth over time.
+TED 是高质量思想的入口。MyTalk Studio 将这些观点与用户的个人经验连接起来，陪伴用户记录一个念头、把它发展为表达、与他人分享，并在长期积累中看见自己的成长。
 
-## Product flow
+## 产品路径
 
-1. **Footprints**: Record a feeling, question, or unsent response; edit and tag it for later use.
-2. **Expression Studio**: Start from a moment, an existing thought, a TED reflection, or a response to an opinion. Select footprints and develop the idea through guided questions.
-3. **Thought Library**: Share an expression as a cover card; readers can respond, ask a gentle question, or collect a footprint.
-4. **Growth**: Review expression records, recurring themes, an activity calendar, and representative works.
+1. **足迹**：记录一句感受、一个疑问或一条没有发出的回应；可编辑、打标签，并留待之后调用。
+2. **表达工坊**：从一个瞬间、已有想法、TED 感受或想回应的观点进入，选择相关足迹，通过引导问题逐步说清。
+3. **思想图书馆**：将表达制作成封面卡片分享；读者可以认同、留下温和追问或收藏一条足迹。
+4. **成长**：回看足迹、成稿、常出现主题、表达日历与代表表达。
 
-## Demo
+## 运行原型
 
-Open `outputs/mytalk_studio_demo.html` locally in a modern browser.
+使用现代浏览器直接打开 `outputs/mytalk_studio_demo.html` 即可体验原型。
 
-The current prototype uses local, controllable demo logic to validate the product flow and interactions. A production version can connect to LLM dialogue, TED transcript analysis, speech recognition, and expression feedback.
+当前版本使用可控的本地演示逻辑验证产品流程与交互。它没有接入真实的大语言模型、TED 内容接口、语音识别服务、用户账号、数据库或真实社区内容。正式版本可进一步接入 LLM 对话、TED 文本解析、语音识别、表达反馈、账户服务与具备审核机制的社区基础设施。
 
-## Project materials
+## 项目材料
 
-- `outputs/MyTalk_Studio_项目介绍.md`: Project brief
-- `outputs/mytalk_studio_opening_report.md`: Registration-form copy
-- `outputs/mytalk_studio_supplement.md`: Supplementary project notes
-- `outputs/mytalk_studio_submission_checklist.md`: Submission checklist
-- `outputs/mytalk_studio_demo.html`: Interactive prototype
-
-## Team
-
-Built by a two-person student team for the New Channel TED enterprise challenge.
+- `outputs/MyTalk_Studio_项目介绍.md`：项目介绍
+- `outputs/mytalk_studio_opening_report.md`：报名表文案
+- `outputs/mytalk_studio_supplement.md`：项目补充说明
+- `outputs/mytalk_studio_submission_checklist.md`：最终提交清单
+- `outputs/mytalk_studio_demo.html`：可交互原型
