@@ -20,11 +20,3 @@ TED 是高质量思想的入口。MyTalk 将这些观点与用户的个人经验
 使用现代浏览器直接打开 `outputs/mytalk_studio_demo.html` 即可体验原型。
 
 当前版本使用可控的本地演示逻辑验证产品流程与交互。它没有接入真实的大语言模型、TED 内容接口、语音识别服务、用户账号、数据库或真实社区内容。正式版本可进一步接入 LLM 对话、TED 文本解析、语音识别、表达反馈、账户服务与具备审核机制的社区基础设施。
-
-## 项目材料
-
-- `outputs/MyTalk_项目介绍.md`：项目介绍
-- `outputs/mytalk_studio_opening_report.md`：报名表文案
-- `outputs/mytalk_studio_supplement.md`：项目补充说明
-- `outputs/mytalk_studio_submission_checklist.md`：最终提交清单
-- `outputs/mytalk_studio_demo.html`：可交互原型
