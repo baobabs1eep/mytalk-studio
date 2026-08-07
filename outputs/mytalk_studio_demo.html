@@ -1275,11 +1275,11 @@
         <div class="hidden" id="studioWorkspace">
         <div class="grid two growth-pair">
           <div class="panel">
-            <h3>把足迹带进英语表达</h3>
-            <p class="section-note">题目提供表达场景，足迹提供个人内容，TED 提供思想与语言输入，AI 帮助你完成语言转换。</p>
+            <h3 id="studioWorkspaceTitle">选择今天想说清的东西</h3>
+            <p class="section-note" id="studioWorkspaceLead">你可以从一个已经成形的想法开始，也可以从一个还说不清的感受开始。</p>
             <div class="grid" id="freePathPanel" style="margin-top:14px;">
               <div class="field">
-                <label for="studioSource">内容从哪里开始</label>
+                <label for="studioSource">表达入口</label>
                 <select id="studioSource">
                   <option value="feeling">我只有一个瞬间，还说不清</option>
                   <option value="thought">我已经有一个想法</option>
@@ -1288,11 +1288,11 @@
                 </select>
               </div>
               <div class="field">
-                <label for="studioText">我的个人内容</label>
+                <label for="studioText">当前想法</label>
                 <textarea id="studioText">我想说清楚：AI 时代最重要的是更知道自己为什么要问。</textarea>
               </div>
               <div class="field">
-                <label for="formatSelect">输出长度</label>
+                <label for="formatSelect">输出形式</label>
                 <select id="formatSelect">
                   <option value="一句话">一句话</option>
                   <option value="一段话">一段话</option>
@@ -1332,11 +1332,11 @@
               </div>
             </div>
             <div class="actions">
-              <button class="primary" id="startDialogueBtn">开始自由表达</button>
+              <button class="primary" id="startDialogueBtn">开始陪我说清</button>
               <button class="secondary" id="changeStudioModeBtn">更换模式</button>
               <button class="secondary" id="pullFootprintsBtn">去选择足迹</button>
             </div>
-            <p class="entry-hint" id="entryHint">先从一条真实足迹开始，再把它变成英语表达。</p>
+            <p class="entry-hint" id="entryHint">从感受开始，先说清它让你停下来的地方。</p>
           </div>
 
           <div class="panel">
@@ -1347,7 +1347,7 @@
         </div>
 
         <div class="panel hidden" id="dialoguePanel">
-          <h3>先把自己的内容想清楚</h3>
+          <h3 id="dialoguePanelTitle">和 AI 把话说清</h3>
           <div class="question-card" style="margin-top:14px;">
             <p class="exam-intro hidden" id="examQuestionContext"></p>
             <div class="question-tabs" id="questionTabs"></div>
@@ -1708,7 +1708,12 @@
       byId("studioWorkspace").classList.remove("hidden");
       byId("freePathPanel").classList.toggle("hidden", mode !== "free");
       byId("examPathPanel").classList.toggle("hidden", mode !== "exam");
-      byId("startDialogueBtn").textContent = mode === "exam" ? "开始真题训练" : "开始自由表达";
+      byId("studioWorkspaceTitle").textContent = mode === "exam" ? "把足迹带进英语表达" : "选择今天想说清的东西";
+      byId("studioWorkspaceLead").textContent = mode === "exam"
+        ? "题目提供表达场景，足迹提供个人内容，TED 提供思想与语言输入，AI 帮助你完成语言转换。"
+        : "你可以从一个已经成形的想法开始，也可以从一个还说不清的感受开始。";
+      byId("dialoguePanelTitle").textContent = mode === "exam" ? "先把自己的内容想清楚" : "和 AI 把话说清";
+      byId("startDialogueBtn").textContent = mode === "exam" ? "开始真题训练" : "开始陪我说清";
       state.questionIndex = 0;
       state.answers = ["", "", ""];
       byId("dialoguePanel").classList.add("hidden");
@@ -2064,7 +2069,9 @@
       byId("currentQuestion").textContent = promptsForPath[state.questionIndex];
       byId("answerBox").value = state.answers[state.questionIndex] || "";
       byId("prevQuestionBtn").disabled = state.questionIndex === 0;
-      byId("nextQuestionBtn").textContent = state.questionIndex === promptsForPath.length - 1 ? "进入英语练习" : "保存并继续";
+      byId("nextQuestionBtn").textContent = state.questionIndex === promptsForPath.length - 1
+        ? (studioMode === "exam" ? "进入英语练习" : "整理成表达")
+        : "保存并继续";
       document.querySelectorAll("[data-q]").forEach(button => {
         button.addEventListener("click", () => {
           saveAnswer();
@@ -2409,7 +2416,11 @@
     byId("nextQuestionBtn").addEventListener("click", () => {
       saveAnswer();
       if (state.questionIndex >= currentPrompts().length - 1) {
-        renderLanguagePanel();
+        if (studioMode === "exam") {
+          renderLanguagePanel();
+        } else {
+          generateExpression();
+        }
       } else {
         state.questionIndex += 1;
         renderQuestions();
