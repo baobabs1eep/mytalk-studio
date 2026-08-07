@@ -248,6 +248,58 @@
       font-size: 14px;
     }
 
+    .mode-choice-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      margin-top: 16px;
+    }
+
+    .mode-choice {
+      display: grid;
+      gap: 5px;
+      min-height: 112px;
+      padding: 16px;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .mode-choice:hover,
+    .mode-choice.active {
+      border-color: var(--view-accent);
+      background: var(--view-soft);
+    }
+
+    .mode-choice.active {
+      box-shadow: inset 0 0 0 2px var(--view-accent);
+    }
+
+    .mode-choice strong {
+      font-size: 17px;
+    }
+
+    .mode-choice span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.55;
+    }
+
+    .mode-choice .mode-icon {
+      color: var(--view-accent);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .exam-intro {
+      padding: 12px 14px;
+      border-left: 3px solid var(--view-accent);
+      background: var(--view-soft);
+      color: var(--ink) !important;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
     .field {
       display: grid;
       gap: 7px;
@@ -987,6 +1039,7 @@
       .chooser-card { padding: 16px; max-height: calc(100vh - 20px); }
       .chooser-grid { grid-template-columns: 1fr; }
       .chooser-footer { bottom: -16px; margin: 0 -16px -16px; padding: 12px 16px; }
+      .mode-choice-grid { grid-template-columns: 1fr; }
       .profile-summary { gap: 20px; }
       .profile-stats { min-height: 90px; }
       .profile-stat { padding: 0 10px; }
@@ -1164,17 +1217,19 @@
           <div class="panel">
             <h3>把足迹带进英语表达</h3>
             <p class="section-note">题目提供表达场景，足迹提供个人内容，TED 提供思想与语言输入，AI 帮助你完成语言转换。</p>
-            <div class="grid" style="margin-top:14px;">
-              <div class="field">
-                <label for="studioGoal">今天的训练目标</label>
-                <select id="studioGoal">
-                  <option value="free">自由表达</option>
-                  <option value="ielts-speaking">雅思口语真题</option>
-                  <option value="ielts-writing">雅思写作真题</option>
-                  <option value="toefl-speaking">托福口语真题</option>
-                  <option value="toefl-writing">托福写作真题</option>
-                </select>
-              </div>
+            <div class="grid mode-choice-grid" aria-label="表达模式">
+              <button class="mode-choice active" type="button" data-studio-mode="free" aria-pressed="true">
+                <span class="mode-icon">✦</span>
+                <strong>自由表达</strong>
+                <span>从生活足迹、TED 感受或一个念头出发，慢慢形成自己的表达。</span>
+              </button>
+              <button class="mode-choice" type="button" data-studio-mode="exam" aria-pressed="false">
+                <span class="mode-icon">▣</span>
+                <strong>真题训练</strong>
+                <span>进入新航道真题场景，练习观点组织、英语表达和语言细节。</span>
+              </button>
+            </div>
+            <div class="grid" id="freePathPanel" style="margin-top:14px;">
               <div class="field">
                 <label for="studioSource">内容从哪里开始</label>
                 <select id="studioSource">
@@ -1199,8 +1254,37 @@
                 </select>
               </div>
             </div>
+            <div class="grid hidden" id="examPathPanel" style="margin-top:14px;">
+              <p class="exam-intro">真题提供表达场景，足迹提供个人内容。你可以先组织自己的观点，再完成词汇、语法、句式和英语表达练习。</p>
+              <div class="grid two">
+                <div class="field">
+                  <label for="studioGoal">考试与题型</label>
+                  <select id="studioGoal">
+                    <option value="ielts-speaking">雅思口语真题</option>
+                    <option value="ielts-writing">雅思写作真题</option>
+                    <option value="toefl-speaking">托福口语真题</option>
+                    <option value="toefl-writing">托福写作真题</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="questionSetSelect">题目来源</label>
+                  <select id="questionSetSelect">
+                    <option value="official">新航道官方真题</option>
+                    <option value="practice">我的练习题</option>
+                  </select>
+                </div>
+              </div>
+              <div class="field">
+                <label for="examQuestion">当前训练题</label>
+                <select id="examQuestion">
+                  <option>Describe a meaningful experience that changed your view.</option>
+                  <option>Some people believe technology makes life more complicated. Discuss.</option>
+                  <option>Do you agree that students should learn through discussion?</option>
+                </select>
+              </div>
+            </div>
             <div class="actions">
-              <button class="primary" id="startDialogueBtn">开始真题训练</button>
+              <button class="primary" id="startDialogueBtn">开始自由表达</button>
               <button class="secondary" id="pullFootprintsBtn">去选择足迹</button>
             </div>
             <p class="entry-hint" id="entryHint">先从一条真实足迹开始，再把它变成英语表达。</p>
@@ -1216,6 +1300,7 @@
         <div class="panel hidden" id="dialoguePanel">
           <h3>先把自己的内容想清楚</h3>
           <div class="question-card" style="margin-top:14px;">
+            <p class="exam-intro hidden" id="examQuestionContext"></p>
             <div class="question-tabs" id="questionTabs"></div>
             <div class="prompt" id="currentQuestion"></div>
             <div class="field">
@@ -1490,6 +1575,7 @@
     let readerIndex = null;
     let chooserIds = [];
     let chooserTag = "全部";
+    let studioMode = "free";
 
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
@@ -1523,22 +1609,43 @@
     }
 
     function currentPrompts() {
-      const goal = byId("studioGoal")?.value || "free";
+      const goal = studioMode === "exam" ? (byId("studioGoal")?.value || "ielts-speaking") : "free";
       const source = byId("studioSource").value;
       const set = goalPrompts[goal] || goalPrompts.free;
       return set[source] || questionSets.feeling;
     }
 
     function updateEntryHint() {
+      if (studioMode === "exam") {
+        const goal = byId("studioGoal")?.value || "ielts-speaking";
+        byId("entryHint").textContent = `当前为${goalLabels[goal]}：先用自己的足迹组织观点，再进入英语词汇、语法和句式练习。`;
+        return;
+      }
       const hints = {
         feeling: "从感受开始，先说清它让你停下来的地方。",
         thought: "从判断开始，陪你找到它背后的经历和证据。",
         ted: "从 TED 的一个观点出发，把它放回你的生活。",
         reply: "从想回应的一句话开始，把情绪变成可以被听见的表达。"
       };
-      const goal = byId("studioGoal")?.value || "free";
-      const goalHint = goal === "free" ? "" : ` · 目标：${goalLabels[goal]}`;
-      byId("entryHint").textContent = (hints[byId("studioSource").value] || hints.feeling) + goalHint;
+      byId("entryHint").textContent = hints[byId("studioSource").value] || hints.feeling;
+    }
+
+    function setStudioMode(mode) {
+      studioMode = mode;
+      document.querySelectorAll("[data-studio-mode]").forEach(button => {
+        const active = button.dataset.studioMode === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-pressed", String(active));
+      });
+      byId("freePathPanel").classList.toggle("hidden", mode !== "free");
+      byId("examPathPanel").classList.toggle("hidden", mode !== "exam");
+      byId("startDialogueBtn").textContent = mode === "exam" ? "开始真题训练" : "开始自由表达";
+      state.questionIndex = 0;
+      state.answers = ["", "", ""];
+      byId("dialoguePanel").classList.add("hidden");
+      byId("languagePanel").classList.add("hidden");
+      byId("draftPanel").classList.add("hidden");
+      updateEntryHint();
     }
 
     function stageLabel(stage) {
@@ -1863,6 +1970,13 @@
     function renderQuestions() {
       const promptsForPath = currentPrompts();
       byId("questionTabs").innerHTML = promptsForPath.map((_, index) => `<button class="qtab ${state.questionIndex === index ? "active" : ""} ${state.answers[index] ? "done" : ""}" data-q="${index}">问题 ${index + 1}</button>`).join("");
+      const questionContext = byId("examQuestionContext");
+      if (studioMode === "exam") {
+        questionContext.textContent = `当前真题：${byId("examQuestion").value}`;
+        questionContext.classList.remove("hidden");
+      } else {
+        questionContext.classList.add("hidden");
+      }
       byId("currentQuestion").textContent = promptsForPath[state.questionIndex];
       byId("answerBox").value = state.answers[state.questionIndex] || "";
       byId("prevQuestionBtn").disabled = state.questionIndex === 0;
@@ -1882,7 +1996,7 @@
     }
 
     function renderLanguagePanel() {
-      const goal = byId("studioGoal")?.value || "free";
+      const goal = studioMode === "exam" ? (byId("studioGoal")?.value || "ielts-speaking") : "free";
       const goalLabel = goalLabels[goal] || goalLabels.free;
       const cards = goal === "free"
         ? [
@@ -1914,7 +2028,7 @@
       const a2 = state.answers[2] || "我希望别人也能想一想，自己是否也有类似的没有说出口的时刻";
       const claim = source.replace(/^我想说清楚[:：]\s*/, "");
       const format = byId("formatSelect").value;
-      const goal = byId("studioGoal")?.value || "free";
+      const goal = studioMode === "exam" ? (byId("studioGoal")?.value || "ielts-speaking") : "free";
 
       byId("draftTitle").value = titleFromClaim(claim, tags);
       byId("draftClaim").value = claim;
@@ -2167,6 +2281,9 @@
     });
 
     byId("startDialogueBtn").addEventListener("click", () => {
+      if (studioMode === "exam") {
+        byId("studioText").value = `我想回答这道真题：${byId("examQuestion").value}`;
+      }
       state.questionIndex = 0;
       state.answers = ["", "", ""];
       byId("dialoguePanel").classList.remove("hidden");
@@ -2231,6 +2348,14 @@
       state.answers = ["", "", ""];
       updateEntryHint();
       if (!byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
+    });
+
+    document.querySelectorAll("[data-studio-mode]").forEach(button => {
+      button.addEventListener("click", () => setStudioMode(button.dataset.studioMode));
+    });
+
+    byId("examQuestion").addEventListener("change", () => {
+      if (studioMode === "exam" && !byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
     });
 
     byId("checkLanguageBtn").addEventListener("click", () => {
