@@ -1129,6 +1129,30 @@
         </div>
 
         <div class="panel">
+          <div class="section-heading">
+            <div>
+              <span class="tag orange">TED 灵感入口</span>
+              <h3 style="margin-top:10px;">从一场演讲，留下一个反应</h3>
+              <p class="section-note">观看精选 TED 内容后，直接把认同、疑问或想反驳的地方存进同一个足迹板块。</p>
+            </div>
+          </div>
+          <div class="grid three" style="margin-top:14px;">
+            <article class="library-card">
+              <div class="post-cover" style="min-height:150px;"><span class="tag">TED · 创造力</span><span class="cover-title">Do schools kill creativity?</span><p>Ken Robinson</p></div>
+              <p class="post-snippet">从教育与创造力出发，想想哪些经历改变了你对“标准答案”的看法。</p>
+              <a class="secondary" href="https://www.ted.com/talks/sir_ken_robinson_do_schools_kill_creativity" target="_blank" rel="noreferrer">打开 TED 演讲</a>
+              <button class="mini" data-ted-prompt="看完 Ken Robinson 的 TED，我想到学校里常常只奖励标准答案。">留下我的反应</button>
+            </article>
+            <article class="library-card">
+              <div class="post-cover" style="min-height:150px;"><span class="tag">TED · 科技</span><span class="cover-title">The danger of a single story</span><p>Chimamanda Ngozi Adichie</p></div>
+              <p class="post-snippet">从单一叙事出发，记录一次你重新理解某个人、某个地方或自己的时刻。</p>
+              <a class="secondary" href="https://www.ted.com/talks/chimamanda_ngozi_adichie_the_danger_of_a_single_story" target="_blank" rel="noreferrer">打开 TED 演讲</a>
+              <button class="mini" data-ted-prompt="看完这场 TED，我想到一个人不能只被一种故事定义。">留下我的反应</button>
+            </article>
+          </div>
+        </div>
+
+        <div class="panel">
           <h3>我收藏的足迹纸条</h3>
           <p class="section-note">在思想图书馆读到、想留给以后的那些话，会放在这里。</p>
           <div class="footprint-board" id="collectedFootprintBoard" style="margin-top:14px;"></div>
@@ -1138,11 +1162,21 @@
       <section class="view" id="studio">
         <div class="grid two growth-pair">
           <div class="panel">
-            <h3>选择今天想说清的东西</h3>
-            <p class="section-note">你可以从一个已经成形的想法开始，也可以从一个还说不清的感受开始。</p>
+            <h3>把足迹带进英语表达</h3>
+            <p class="section-note">题目提供表达场景，足迹提供个人内容，TED 提供思想与语言输入，AI 帮助你完成语言转换。</p>
             <div class="grid" style="margin-top:14px;">
               <div class="field">
-                <label for="studioSource">表达入口</label>
+                <label for="studioGoal">今天的训练目标</label>
+                <select id="studioGoal">
+                  <option value="free">自由表达</option>
+                  <option value="ielts-speaking">雅思口语真题</option>
+                  <option value="ielts-writing">雅思写作真题</option>
+                  <option value="toefl-speaking">托福口语真题</option>
+                  <option value="toefl-writing">托福写作真题</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="studioSource">内容从哪里开始</label>
                 <select id="studioSource">
                   <option value="feeling">我只有一个瞬间，还说不清</option>
                   <option value="thought">我已经有一个想法</option>
@@ -1151,11 +1185,11 @@
                 </select>
               </div>
               <div class="field">
-                <label for="studioText">当前想法</label>
+                <label for="studioText">我的个人内容</label>
                 <textarea id="studioText">我想说清楚：AI 时代最重要的是更知道自己为什么要问。</textarea>
               </div>
               <div class="field">
-                <label for="formatSelect">输出形式</label>
+                <label for="formatSelect">输出长度</label>
                 <select id="formatSelect">
                   <option value="一句话">一句话</option>
                   <option value="一段话">一段话</option>
@@ -1166,10 +1200,10 @@
               </div>
             </div>
             <div class="actions">
-              <button class="primary" id="startDialogueBtn">开始陪我说清</button>
+              <button class="primary" id="startDialogueBtn">开始真题训练</button>
               <button class="secondary" id="pullFootprintsBtn">去选择足迹</button>
             </div>
-            <p class="entry-hint" id="entryHint">从感受开始，先说清它让你停下来的地方。</p>
+            <p class="entry-hint" id="entryHint">先从一条真实足迹开始，再把它变成英语表达。</p>
           </div>
 
           <div class="panel">
@@ -1180,7 +1214,7 @@
         </div>
 
         <div class="panel hidden" id="dialoguePanel">
-          <h3>和 AI 把话说清</h3>
+          <h3>先把自己的内容想清楚</h3>
           <div class="question-card" style="margin-top:14px;">
             <div class="question-tabs" id="questionTabs"></div>
             <div class="prompt" id="currentQuestion"></div>
@@ -1192,6 +1226,20 @@
               <button class="secondary" id="prevQuestionBtn">上一个问题</button>
               <button class="primary" id="nextQuestionBtn">保存并继续</button>
             </div>
+          </div>
+        </div>
+
+        <div class="panel hidden" id="languagePanel">
+          <h3>把想法练成英语</h3>
+          <p class="section-note" id="languageGoalNote">从你的回答中提取词汇、语法和句式，完成一次小练习。</p>
+          <div class="grid three" style="margin-top:14px;" id="languageCards"></div>
+          <div class="field" style="margin-top:14px;">
+            <label for="translationBox">试着用英语表达</label>
+            <textarea id="translationBox" placeholder="先写出你想说的中文，再试着用英语表达。"></textarea>
+          </div>
+          <div class="actions">
+            <button class="primary" id="checkLanguageBtn">检查这次表达</button>
+            <span class="entry-hint" id="languageFeedback">完成练习后，这里会出现一条可执行的修改建议。</span>
           </div>
         </div>
 
@@ -1387,6 +1435,42 @@
       ]
     };
 
+    const goalPrompts = {
+      free: questionSets,
+      "ielts-speaking": {
+        feeling: ["这道题要求你描述什么？你的真实经历是哪一件？", "这个经历发生在什么具体场景？你当时做了什么？", "你希望考官听到的核心观点是什么？"],
+        thought: ["你对这个题目的直接判断是什么？", "你能用哪段个人经历支持这个判断？", "你希望用哪一个例子让回答更具体？"],
+        ted: ["TED 的哪个观点可以帮助你回答这道题？", "它和你的生活经历有什么连接？", "你希望用哪句话完成自己的立场表达？"],
+        reply: ["题目中的观点让你想到什么真实经历？", "你可以用哪个具体例子展开？", "如果用一句英语回应，你最想说清什么？"]
+      },
+      "ielts-writing": {
+        feeling: ["这道写作题的核心争议是什么？你的立场是什么？", "你能提供哪一个生活或社会例子？", "你的结论希望读者重新思考什么？"],
+        thought: ["你的中心论点可以怎样写成一句清楚的英文？", "哪两个理由最能支持它？", "你准备怎样用让步或因果关系组织段落？"],
+        ted: ["TED 中哪个观点可以成为你的论据或背景？", "它如何连接到题目要求？", "你准备怎样用自己的经历补充这个观点？"],
+        reply: ["题目中的立场让你想到哪一次真实争论？", "你会怎样承认另一种观点的合理性？", "你的最终判断是什么？"]
+      },
+      "toefl-speaking": {
+        feeling: ["你要在限时回答中表达什么观点？", "哪个具体经历能最快支持你的观点？", "你准备怎样用一句结论收束回答？"],
+        thought: ["你对题目的立场是什么？", "你能给出哪一个具体理由和例子？", "最后十秒你想留下什么结论？"],
+        ted: ["TED 的哪个观点可以成为你的快速输入？", "它和你的个人经历如何连接？", "你会怎样用清晰结构完成回答？"],
+        reply: ["你想回应的观点是什么？", "哪个个人例子能让回应更可信？", "你的回答最后要落在哪个判断上？"]
+      },
+      "toefl-writing": {
+        feeling: ["材料或题目中的核心问题是什么？", "你的个人经历如何帮助你形成判断？", "你会用什么结论回应题目？"],
+        thought: ["你准备支持哪一个观点？", "哪些理由和例子可以组织成段落？", "你会怎样连接材料与自己的判断？"],
+        ted: ["TED 的哪个观点可以帮助你理解材料？", "它和你的生活经验有什么联系？", "你准备怎样写出自己的综合判断？"],
+        reply: ["你想回应的立场是什么？", "哪个例子能解释你的回应？", "你会怎样在结尾确认自己的观点？"]
+      }
+    };
+
+    const goalLabels = {
+      free: "自由表达",
+      "ielts-speaking": "雅思口语真题",
+      "ielts-writing": "雅思写作真题",
+      "toefl-speaking": "托福口语真题",
+      "toefl-writing": "托福写作真题"
+    };
+
     const viewMeta = {
       footprints: ["今天，你有什么感想？", "那些一闪而过的细微感触，我们总有一天可以讲清楚。"],
       studio: ["把一个念头说清楚", "我陪你追问、引用你的足迹，再把它整理成你愿意发出去的版本。"],
@@ -1439,7 +1523,10 @@
     }
 
     function currentPrompts() {
-      return questionSets[byId("studioSource").value] || questionSets.feeling;
+      const goal = byId("studioGoal")?.value || "free";
+      const source = byId("studioSource").value;
+      const set = goalPrompts[goal] || goalPrompts.free;
+      return set[source] || questionSets.feeling;
     }
 
     function updateEntryHint() {
@@ -1449,7 +1536,9 @@
         ted: "从 TED 的一个观点出发，把它放回你的生活。",
         reply: "从想回应的一句话开始，把情绪变成可以被听见的表达。"
       };
-      byId("entryHint").textContent = hints[byId("studioSource").value] || hints.feeling;
+      const goal = byId("studioGoal")?.value || "free";
+      const goalHint = goal === "free" ? "" : ` · 目标：${goalLabels[goal]}`;
+      byId("entryHint").textContent = (hints[byId("studioSource").value] || hints.feeling) + goalHint;
     }
 
     function stageLabel(stage) {
@@ -1777,7 +1866,7 @@
       byId("currentQuestion").textContent = promptsForPath[state.questionIndex];
       byId("answerBox").value = state.answers[state.questionIndex] || "";
       byId("prevQuestionBtn").disabled = state.questionIndex === 0;
-      byId("nextQuestionBtn").textContent = state.questionIndex === promptsForPath.length - 1 ? "整理成表达" : "保存并继续";
+      byId("nextQuestionBtn").textContent = state.questionIndex === promptsForPath.length - 1 ? "进入英语练习" : "保存并继续";
       document.querySelectorAll("[data-q]").forEach(button => {
         button.addEventListener("click", () => {
           saveAnswer();
@@ -1792,6 +1881,28 @@
       persistState();
     }
 
+    function renderLanguagePanel() {
+      const goal = byId("studioGoal")?.value || "free";
+      const goalLabel = goalLabels[goal] || goalLabels.free;
+      const cards = goal === "free"
+        ? [
+            ["核心词汇", "critical thinking · independent judgment", "把抽象想法说得更准确"],
+            ["高频搭配", "rely heavily on · shape our choices", "让观点更自然地连接起来"],
+            ["句式练习", "What concerns me most is...", "把真正介意的地方说清楚"]
+          ]
+        : [
+            ["核心词汇", "critical thinking · personal experience", `服务于${goalLabel}的主题表达`],
+            ["高频搭配", "provide a concrete example · in my view", "让理由和例子更清楚"],
+            ["句式练习", "The more..., the more...", "练习因果、让步和比较结构"]
+          ];
+      byId("languageGoalNote").textContent = `${goalLabel}：从你的回答中提取词汇、语法和句式，完成一次小练习。`;
+      byId("languageCards").innerHTML = cards.map(([title, value, note]) => `<article class="quote"><strong>${escapeHtml(title)}</strong><p style="margin:8px 0 0; color:var(--view-accent);">${escapeHtml(value)}</p><span class="draft-meta">${escapeHtml(note)}</span></article>`).join("");
+      byId("translationBox").value = state.answers.filter(Boolean).join(" ") || byId("studioText").value.trim();
+      byId("languageFeedback").textContent = "完成练习后，这里会出现一条可执行的修改建议。";
+      byId("languagePanel").classList.remove("hidden");
+      byId("draftPanel").classList.add("hidden");
+    }
+
     function generateExpression(recordActivity = true) {
       saveAnswer();
       const source = byId("studioText").value.trim() || "我想说清一个还没有完整成形的想法。";
@@ -1803,10 +1914,11 @@
       const a2 = state.answers[2] || "我希望别人也能想一想，自己是否也有类似的没有说出口的时刻";
       const claim = source.replace(/^我想说清楚[:：]\s*/, "");
       const format = byId("formatSelect").value;
+      const goal = byId("studioGoal")?.value || "free";
 
       byId("draftTitle").value = titleFromClaim(claim, tags);
       byId("draftClaim").value = claim;
-      byId("draftText").value = buildDraftText(format, claim, a0, a1, a2, remembered);
+      byId("draftText").value = buildDraftText(format, claim, a0, a1, a2, remembered, goal);
       byId("draftCoverTitle").textContent = byId("draftTitle").value;
       byId("draftCoverClaim").textContent = claim.length > 48 ? `${claim.slice(0, 48)}…` : claim;
       byId("usedMaterial").innerHTML = remembered.map(item => `<div class="quote">${escapeHtml(item.text)}</div>`).join("");
@@ -1835,8 +1947,15 @@
       return "把一个没有说出口的想法说清楚";
     }
 
-    function buildDraftText(format, claim, a0, a1, a2, remembered) {
+    function buildDraftText(format, claim, a0, a1, a2, remembered, goal = "free") {
       const memoryLine = remembered.map(item => `我曾经记录过：“${item.text}”`).join("\n");
+      if (goal !== "free") {
+        const goalLabel = goalLabels[goal];
+        const englishClaim = "AI should support independent thinking instead of replacing it.";
+        const personalExample = "For example, I have noticed that students sometimes focus on finding the right answer rather than asking a meaningful question.";
+        const structure = goal.includes("writing") ? "This example shows why personal experience can make an argument more convincing." : "That is why this experience has changed the way I think about technology.";
+        return `${goalLabel}\n\nClaim\n${englishClaim}\n\nPersonal example\n${personalExample}\n\nReflection\n${structure}\n\nUseful language\ncritical thinking · independent judgment · rely heavily on · What concerns me most is...`;
+      }
       if (format === "一句话") {
         return claim;
       }
@@ -1989,6 +2108,16 @@
       byId("footprintText").value = randomPrompts[Math.floor(Math.random() * randomPrompts.length)];
     });
 
+    document.querySelectorAll("[data-ted-prompt]").forEach(button => {
+      button.addEventListener("click", () => {
+        byId("triggerType").value = "看完 TED";
+        byId("footprintText").value = button.dataset.tedPrompt;
+        byId("footprintTags").value = "TED, AI, 教育";
+        byId("footprintText").focus();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+    });
+
     byId("addFootprintBtn").addEventListener("click", () => {
       const text = byId("footprintText").value.trim();
       if (!text) {
@@ -2041,6 +2170,7 @@
       state.questionIndex = 0;
       state.answers = ["", "", ""];
       byId("dialoguePanel").classList.remove("hidden");
+      byId("languagePanel").classList.add("hidden");
       byId("draftPanel").classList.add("hidden");
       renderQuestions();
       addActivity(1);
@@ -2055,7 +2185,7 @@
     byId("nextQuestionBtn").addEventListener("click", () => {
       saveAnswer();
       if (state.questionIndex >= currentPrompts().length - 1) {
-        generateExpression();
+        renderLanguagePanel();
       } else {
         state.questionIndex += 1;
         renderQuestions();
@@ -2094,6 +2224,23 @@
       state.answers = ["", "", ""];
       updateEntryHint();
       if (!byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
+    });
+
+    byId("studioGoal").addEventListener("change", () => {
+      state.questionIndex = 0;
+      state.answers = ["", "", ""];
+      updateEntryHint();
+      if (!byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
+    });
+
+    byId("checkLanguageBtn").addEventListener("click", () => {
+      const value = byId("translationBox").value.trim();
+      byId("languageFeedback").textContent = value
+        ? "建议：保留你的具体经历，再补充一个连接词或因果句，让观点、例子和结论形成清晰结构。"
+        : "先写下一句你真正想表达的话，再开始修改。";
+      if (value) {
+        generateExpression();
+      }
     });
 
     byId("formatSelect").addEventListener("change", () => {
