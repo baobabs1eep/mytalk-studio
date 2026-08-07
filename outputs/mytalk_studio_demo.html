@@ -1213,22 +1213,29 @@
       </section>
 
       <section class="view" id="studio">
+        <div class="panel" id="studioStartPanel">
+          <span class="tag">表达工坊</span>
+          <h3 style="margin-top:10px;">今天想怎样练习表达？</h3>
+          <p class="section-note">选择一条路径开始。你可以从自己的足迹出发，也可以带着新航道真题练习英语表达。</p>
+          <div class="grid mode-choice-grid" aria-label="表达模式">
+            <button class="mode-choice" type="button" data-studio-mode="free" aria-pressed="false">
+              <span class="mode-icon">✦</span>
+              <strong>自由表达</strong>
+              <span>从生活足迹、TED 感受或一个念头出发，慢慢形成自己的表达。</span>
+            </button>
+            <button class="mode-choice" type="button" data-studio-mode="exam" aria-pressed="false">
+              <span class="mode-icon">▣</span>
+              <strong>真题训练</strong>
+              <span>进入新航道真题场景，练习观点组织、英语表达和语言细节。</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="hidden" id="studioWorkspace">
         <div class="grid two growth-pair">
           <div class="panel">
             <h3>把足迹带进英语表达</h3>
             <p class="section-note">题目提供表达场景，足迹提供个人内容，TED 提供思想与语言输入，AI 帮助你完成语言转换。</p>
-            <div class="grid mode-choice-grid" aria-label="表达模式">
-              <button class="mode-choice active" type="button" data-studio-mode="free" aria-pressed="true">
-                <span class="mode-icon">✦</span>
-                <strong>自由表达</strong>
-                <span>从生活足迹、TED 感受或一个念头出发，慢慢形成自己的表达。</span>
-              </button>
-              <button class="mode-choice" type="button" data-studio-mode="exam" aria-pressed="false">
-                <span class="mode-icon">▣</span>
-                <strong>真题训练</strong>
-                <span>进入新航道真题场景，练习观点组织、英语表达和语言细节。</span>
-              </button>
-            </div>
             <div class="grid" id="freePathPanel" style="margin-top:14px;">
               <div class="field">
                 <label for="studioSource">内容从哪里开始</label>
@@ -1285,6 +1292,7 @@
             </div>
             <div class="actions">
               <button class="primary" id="startDialogueBtn">开始自由表达</button>
+              <button class="secondary" id="changeStudioModeBtn">更换模式</button>
               <button class="secondary" id="pullFootprintsBtn">去选择足迹</button>
             </div>
             <p class="entry-hint" id="entryHint">先从一条真实足迹开始，再把它变成英语表达。</p>
@@ -1359,6 +1367,7 @@
               <div id="usedMaterial" class="grid"></div>
             </div>
           </div>
+        </div>
         </div>
       </section>
 
@@ -1575,7 +1584,7 @@
     let readerIndex = null;
     let chooserIds = [];
     let chooserTag = "全部";
-    let studioMode = "free";
+    let studioMode = null;
 
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
@@ -1637,6 +1646,8 @@
         button.classList.toggle("active", active);
         button.setAttribute("aria-pressed", String(active));
       });
+      byId("studioStartPanel").classList.add("hidden");
+      byId("studioWorkspace").classList.remove("hidden");
       byId("freePathPanel").classList.toggle("hidden", mode !== "free");
       byId("examPathPanel").classList.toggle("hidden", mode !== "exam");
       byId("startDialogueBtn").textContent = mode === "exam" ? "开始真题训练" : "开始自由表达";
@@ -1646,6 +1657,19 @@
       byId("languagePanel").classList.add("hidden");
       byId("draftPanel").classList.add("hidden");
       updateEntryHint();
+    }
+
+    function showStudioChooser() {
+      studioMode = null;
+      byId("studioStartPanel").classList.remove("hidden");
+      byId("studioWorkspace").classList.add("hidden");
+      byId("dialoguePanel").classList.add("hidden");
+      byId("languagePanel").classList.add("hidden");
+      byId("draftPanel").classList.add("hidden");
+      document.querySelectorAll("[data-studio-mode]").forEach(button => {
+        button.classList.remove("active");
+        button.setAttribute("aria-pressed", "false");
+      });
     }
 
     function stageLabel(stage) {
@@ -1721,7 +1745,7 @@
       byId("pageTitle").textContent = viewMeta[id][0];
       byId("pageLead").textContent = viewMeta[id][1];
       byId("pageLead").classList.toggle("hidden", !viewMeta[id][1]);
-      if (id === "studio") updateEntryHint();
+      if (id === "studio") showStudioChooser();
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
@@ -1816,6 +1840,8 @@
           state.selectedIds = [id, ...state.selectedIds.filter(selectedId => selectedId !== id)].slice(0, 3);
           byId("studioText").value = `我想说清楚：${item.text.split(/[。！？!?]/)[0]}。`;
           showView("studio");
+          setStudioMode("free");
+          renderSelectedFootprints();
           persistState();
         });
       });
@@ -2258,6 +2284,7 @@
       const item = findFootprint(state.editingFootprintId);
       if (item) byId("studioText").value = `我想说清楚：${item.text.split(/[。！？!?]/)[0]}。`;
       showView("studio");
+      setStudioMode("free");
       renderSelectedFootprints();
       persistState();
     });
@@ -2353,6 +2380,8 @@
     document.querySelectorAll("[data-studio-mode]").forEach(button => {
       button.addEventListener("click", () => setStudioMode(button.dataset.studioMode));
     });
+
+    byId("changeStudioModeBtn").addEventListener("click", showStudioChooser);
 
     byId("examQuestion").addEventListener("change", () => {
       if (studioMode === "exam" && !byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
