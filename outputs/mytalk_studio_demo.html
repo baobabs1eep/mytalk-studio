@@ -300,6 +300,47 @@
       line-height: 1.65;
     }
 
+    .answer-summary {
+      display: grid;
+      gap: 10px;
+      align-content: start;
+    }
+
+    .answer-summary-item {
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+    }
+
+    .answer-summary-item strong {
+      display: block;
+      color: var(--view-accent);
+      font-size: 13px;
+    }
+
+    .answer-summary-item p {
+      margin: 6px 0 0;
+      color: var(--ink);
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .ai-review-panel {
+      margin-top: 14px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--view-soft);
+    }
+
+    .ai-review-panel p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.6;
+    }
+
     .field {
       display: grid;
       gap: 7px;
@@ -1325,10 +1366,19 @@
         <div class="panel hidden" id="languagePanel">
           <h3>把想法练成英语</h3>
           <p class="section-note" id="languageGoalNote">从你的回答中提取词汇、语法和句式，完成一次小练习。</p>
-          <div class="grid three" style="margin-top:14px;" id="languageCards"></div>
-          <div class="field" style="margin-top:14px;">
-            <label for="translationBox">试着用英语表达</label>
-            <textarea id="translationBox" placeholder="先写出你想说的中文，再试着用英语表达。"></textarea>
+          <div class="grid two" style="margin-top:14px;">
+            <div>
+              <div class="grid three" id="languageCards"></div>
+              <div class="field" style="margin-top:14px;">
+                <label for="translationBox">试着用英语表达</label>
+                <textarea id="translationBox" placeholder="先写出你想说的中文，再试着用英语表达。"></textarea>
+              </div>
+            </div>
+            <div class="answer-summary" id="answerSummaryPanel">
+              <h3>我的回答整理</h3>
+              <p class="section-note">把刚才的回答放在一起，帮助你确认自己的思路。</p>
+              <div id="answerSummary"></div>
+            </div>
           </div>
           <div class="actions">
             <button class="primary" id="checkLanguageBtn">检查这次表达</button>
@@ -1360,6 +1410,14 @@
               <div class="actions">
                 <button class="primary" id="shareDraftBtn">分享到思想图书馆</button>
                 <button class="secondary" id="saveDraftFootprintBtn">存为足迹</button>
+                <label class="secondary" style="display:inline-flex;align-items:center;gap:8px;cursor:pointer;">
+                  <input type="checkbox" id="enableAiReview" style="width:auto;padding:0;">
+                  开启 AI 打分与修改
+                </label>
+              </div>
+              <div class="ai-review-panel hidden" id="aiReviewPanel">
+                <strong>AI 评分与修改</strong>
+                <p id="aiReviewResult">开启后，这里会显示草稿评分和修改建议。评分标准将在后续接入。</p>
               </div>
             </div>
             <div class="draft-card">
@@ -2038,9 +2096,21 @@
       byId("languageGoalNote").textContent = `${goalLabel}：从你的回答中提取词汇、语法和句式，完成一次小练习。`;
       byId("languageCards").innerHTML = cards.map(([title, value, note]) => `<article class="quote"><strong>${escapeHtml(title)}</strong><p style="margin:8px 0 0; color:var(--view-accent);">${escapeHtml(value)}</p><span class="draft-meta">${escapeHtml(note)}</span></article>`).join("");
       byId("translationBox").value = state.answers.filter(Boolean).join(" ") || byId("studioText").value.trim();
+      renderAnswerSummary();
+      byId("answerSummaryPanel").classList.toggle("hidden", studioMode !== "exam");
       byId("languageFeedback").textContent = "完成练习后，这里会出现一条可执行的修改建议。";
       byId("languagePanel").classList.remove("hidden");
       byId("draftPanel").classList.add("hidden");
+    }
+
+    function renderAnswerSummary() {
+      const labels = ["观点或回应", "经历、理由或例子", "结论或进一步思考"];
+      byId("answerSummary").innerHTML = labels.map((label, index) => `
+        <div class="answer-summary-item">
+          <strong>${label}</strong>
+          <p>${escapeHtml(state.answers[index] || "这一部分还没有填写，可以回到问题页补充。")}</p>
+        </div>
+      `).join("");
     }
 
     function generateExpression(recordActivity = true) {
@@ -2063,6 +2133,8 @@
       byId("draftCoverClaim").textContent = claim.length > 48 ? `${claim.slice(0, 48)}…` : claim;
       byId("usedMaterial").innerHTML = remembered.map(item => `<div class="quote">${escapeHtml(item.text)}</div>`).join("");
       byId("draftPanel").classList.remove("hidden");
+      byId("enableAiReview").checked = false;
+      byId("aiReviewPanel").classList.add("hidden");
       fitDraftFields();
       updateDraftMeta();
       if (recordActivity) {
@@ -2078,6 +2150,14 @@
       const length = byId("draftText").value.trim().length;
       const estimate = format.includes("分钟") ? `约 ${format.split(" ")[0]} 分钟` : `${length} 字`;
       byId("draftMeta").textContent = `· ${format} · ${estimate}`;
+    }
+
+    function runAiReview() {
+      const draft = byId("draftText").value.trim();
+      byId("aiReviewPanel").classList.remove("hidden");
+      byId("aiReviewResult").textContent = draft
+        ? "AI 评分与修改入口已开启。评分维度和具体建议将在接入真题评价标准后显示。当前先保留你的草稿内容，方便继续修改。"
+        : "请先补充草稿内容，再开启 AI 评分与修改。";
     }
 
     function titleFromClaim(claim, tags) {
@@ -2405,6 +2485,13 @@
 
     byId("draftClaim").addEventListener("input", () => fitTextarea(byId("draftClaim"), 72, 220));
     byId("draftText").addEventListener("input", () => fitTextarea(byId("draftText"), 120, 560));
+    byId("enableAiReview").addEventListener("change", event => {
+      if (event.target.checked) {
+        runAiReview();
+      } else {
+        byId("aiReviewPanel").classList.add("hidden");
+      }
+    });
 
     byId("closeReaderBtn").addEventListener("click", closeReader);
     byId("readerModal").addEventListener("click", event => {
