@@ -1168,32 +1168,6 @@
     </div>
   </div>
 
-  <div class="modal reader-modal hidden" id="aiSettingsModal" role="dialog" aria-modal="true" aria-labelledby="aiSettingsTitle">
-    <div class="profile-editor-card">
-      <div class="reader-header">
-        <h2 id="aiSettingsTitle">AI 服务设置</h2>
-        <button class="secondary" id="closeAiSettingsBtn">关闭</button>
-      </div>
-      <p class="section-note">填写由后端或飞书智能体提供的服务地址。密钥只保存在当前浏览器，用于本机演示；正式发布时请改由后端托管密钥。</p>
-      <div class="field">
-        <label for="aiEndpointInput">服务地址</label>
-        <input id="aiEndpointInput" type="url" placeholder="https://your-domain.example/api/mytalk-ai">
-      </div>
-      <div class="field">
-        <label for="aiAgentIdInput">智能体 ID（可选）</label>
-        <input id="aiAgentIdInput" placeholder="由飞书或服务端提供">
-      </div>
-      <div class="field">
-        <label for="aiTokenInput">访问令牌（仅本机演示，可选）</label>
-        <input id="aiTokenInput" type="password" autocomplete="off" placeholder="请勿写入 HTML 或提交到仓库">
-      </div>
-      <div class="actions">
-        <button class="primary" id="saveAiSettingsBtn">保存并启用</button>
-        <button class="secondary" id="disableAiSettingsBtn">使用本地演示</button>
-      </div>
-    </div>
-  </div>
-
   <div class="app">
     <aside>
       <div class="logo">
@@ -1361,10 +1335,8 @@
               <button class="primary" id="startDialogueBtn">开始陪我说清</button>
               <button class="secondary" id="changeStudioModeBtn">更换模式</button>
               <button class="secondary" id="pullFootprintsBtn">去选择足迹</button>
-              <button class="secondary" id="aiSettingsBtn">AI 服务设置</button>
             </div>
             <p class="entry-hint" id="entryHint">从感受开始，先说清它让你停下来的地方。</p>
-            <p class="draft-meta" id="aiConnectionStatus" aria-live="polite">当前使用本地演示追问</p>
           </div>
 
           <div class="panel">
@@ -1667,7 +1639,6 @@
 
     const byId = id => document.getElementById(id);
     const storageKey = "mytalk-studio-state-v3";
-    const aiSettingsStorageKey = "mytalk-studio-ai-settings-v1";
     const AI_CONFIG = window.MYTALK_AI_CONFIG || {};
     const defaultAiSettings = {
       enabled: Boolean(AI_CONFIG.enabled && AI_CONFIG.endpoint),
@@ -1681,20 +1652,14 @@
     let studioMode = null;
     let generatedPrompts = null;
     let aiSummary = "";
-    let aiSettings = { ...defaultAiSettings };
+    // Deployment may inject this configuration. Student-facing screens never expose it.
+    const aiSettings = { ...defaultAiSettings };
 
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
       if (saved) Object.assign(state, saved);
     } catch (error) {
       console.info("本地演示数据读取失败，将使用示例数据。", error);
-    }
-
-    try {
-      const savedAiSettings = JSON.parse(localStorage.getItem(aiSettingsStorageKey) || "null");
-      if (savedAiSettings) aiSettings = { ...aiSettings, ...savedAiSettings };
-    } catch (error) {
-      console.info("AI 服务设置读取失败，将使用本地演示。", error);
     }
 
     state.footprints = state.footprints.map(item => ({ ...item, stage: item.stage || "fragment" }));
@@ -1721,36 +1686,8 @@
       }
     }
 
-    function persistAiSettings() {
-      try {
-        localStorage.setItem(aiSettingsStorageKey, JSON.stringify(aiSettings));
-      } catch (error) {
-        console.info("AI 服务设置保存失败。", error);
-      }
-    }
-
-    function openAiSettings() {
-      byId("aiEndpointInput").value = aiSettings.endpoint || "";
-      byId("aiAgentIdInput").value = aiSettings.agentId || "";
-      byId("aiTokenInput").value = aiSettings.token || "";
-      byId("aiSettingsModal").classList.remove("hidden");
-    }
-
-    function closeAiSettings() {
-      byId("aiSettingsModal").classList.add("hidden");
-    }
-
     function isAiConnected() {
       return Boolean(aiSettings.enabled && aiSettings.endpoint);
-    }
-
-    function updateAiConnectionStatus(message) {
-      const status = byId("aiConnectionStatus");
-      if (message) {
-        status.textContent = message;
-        return;
-      }
-      status.textContent = isAiConnected() ? "已连接飞书 AI：追问、表达检查与草稿评估将使用实时生成" : "当前使用本地演示逻辑";
     }
 
     function resetAiSession() {
@@ -1837,7 +1774,6 @@
 
     async function loadAiQuestions() {
       if (!isAiConnected()) return;
-      updateAiConnectionStatus("AI 正在根据你的足迹准备追问…");
       try {
         const response = await requestAi("ask_questions", aiContext());
         const questions = normalizedList(responseValue(response, "questions"));
@@ -1845,10 +1781,8 @@
           generatedPrompts = questions.slice(0, 3);
           if (generatedPrompts.length === 3) renderQuestions();
         }
-        updateAiConnectionStatus();
       } catch (error) {
         console.info("AI 追问暂时不可用，将使用本地演示逻辑。", error);
-        updateAiConnectionStatus("AI 服务暂时不可用，已切换为本地演示追问");
       }
     }
 
@@ -1867,7 +1801,6 @@
         return reviewText(review) || localExpressionReview(value);
       } catch (error) {
         console.info("AI 表达检查暂时不可用，将使用本地演示逻辑。", error);
-        updateAiConnectionStatus("AI 服务暂时不可用，已切换为本地表达检查");
         return localExpressionReview(value);
       }
     }
@@ -2394,7 +2327,6 @@
         byId("aiReviewResult").textContent = reviewText(review) || localScoreReview(draft);
       } catch (error) {
         console.info("AI 草稿评估暂时不可用，将使用本地演示逻辑。", error);
-        updateAiConnectionStatus("AI 服务暂时不可用，已切换为本地草稿评估");
         byId("aiReviewResult").textContent = localScoreReview(draft);
       }
     }
@@ -2747,31 +2679,6 @@
       }
     });
 
-    byId("aiSettingsBtn").addEventListener("click", openAiSettings);
-    byId("closeAiSettingsBtn").addEventListener("click", closeAiSettings);
-    byId("aiSettingsModal").addEventListener("click", event => {
-      if (event.target === byId("aiSettingsModal")) closeAiSettings();
-    });
-    byId("saveAiSettingsBtn").addEventListener("click", () => {
-      const endpoint = byId("aiEndpointInput").value.trim();
-      aiSettings = {
-        enabled: Boolean(endpoint),
-        endpoint,
-        agentId: byId("aiAgentIdInput").value.trim(),
-        token: byId("aiTokenInput").value.trim()
-      };
-      persistAiSettings();
-      updateAiConnectionStatus();
-      closeAiSettings();
-    });
-    byId("disableAiSettingsBtn").addEventListener("click", () => {
-      aiSettings = { enabled: false, endpoint: "", agentId: "", token: "" };
-      persistAiSettings();
-      resetAiSession();
-      updateAiConnectionStatus();
-      closeAiSettings();
-    });
-
     byId("closeReaderBtn").addEventListener("click", closeReader);
     byId("readerModal").addEventListener("click", event => {
       if (event.target === byId("readerModal")) closeReader();
@@ -2819,7 +2726,6 @@
     renderAll();
     applyViewTheme(state.view);
     updateEntryHint();
-    updateAiConnectionStatus();
   </script>
 </body>
 </html>
