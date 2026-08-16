@@ -1168,6 +1168,32 @@
     </div>
   </div>
 
+  <div class="modal reader-modal hidden" id="aiSettingsModal" role="dialog" aria-modal="true" aria-labelledby="aiSettingsTitle">
+    <div class="profile-editor-card">
+      <div class="reader-header">
+        <h2 id="aiSettingsTitle">AI 服务设置</h2>
+        <button class="secondary" id="closeAiSettingsBtn">关闭</button>
+      </div>
+      <p class="section-note">填写由后端或飞书智能体提供的服务地址。密钥只保存在当前浏览器，用于本机演示；正式发布时请改由后端托管密钥。</p>
+      <div class="field">
+        <label for="aiEndpointInput">服务地址</label>
+        <input id="aiEndpointInput" type="url" placeholder="https://your-domain.example/api/mytalk-ai">
+      </div>
+      <div class="field">
+        <label for="aiAgentIdInput">智能体 ID（可选）</label>
+        <input id="aiAgentIdInput" placeholder="由飞书或服务端提供">
+      </div>
+      <div class="field">
+        <label for="aiTokenInput">访问令牌（仅本机演示，可选）</label>
+        <input id="aiTokenInput" type="password" autocomplete="off" placeholder="请勿写入 HTML 或提交到仓库">
+      </div>
+      <div class="actions">
+        <button class="primary" id="saveAiSettingsBtn">保存并启用</button>
+        <button class="secondary" id="disableAiSettingsBtn">使用本地演示</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app">
     <aside>
       <div class="logo">
@@ -1335,8 +1361,10 @@
               <button class="primary" id="startDialogueBtn">开始陪我说清</button>
               <button class="secondary" id="changeStudioModeBtn">更换模式</button>
               <button class="secondary" id="pullFootprintsBtn">去选择足迹</button>
+              <button class="secondary" id="aiSettingsBtn">AI 服务设置</button>
             </div>
             <p class="entry-hint" id="entryHint">从感受开始，先说清它让你停下来的地方。</p>
+            <p class="draft-meta" id="aiConnectionStatus" aria-live="polite">当前使用本地演示追问</p>
           </div>
 
           <div class="panel">
@@ -1639,16 +1667,34 @@
 
     const byId = id => document.getElementById(id);
     const storageKey = "mytalk-studio-state-v3";
+    const aiSettingsStorageKey = "mytalk-studio-ai-settings-v1";
+    const AI_CONFIG = window.MYTALK_AI_CONFIG || {};
+    const defaultAiSettings = {
+      enabled: Boolean(AI_CONFIG.enabled && AI_CONFIG.endpoint),
+      endpoint: AI_CONFIG.endpoint || "",
+      agentId: AI_CONFIG.agentId || "",
+      token: AI_CONFIG.token || ""
+    };
     let readerIndex = null;
     let chooserIds = [];
     let chooserTag = "全部";
     let studioMode = null;
+    let generatedPrompts = null;
+    let aiSummary = "";
+    let aiSettings = { ...defaultAiSettings };
 
     try {
       const saved = JSON.parse(localStorage.getItem(storageKey) || "null");
       if (saved) Object.assign(state, saved);
     } catch (error) {
       console.info("本地演示数据读取失败，将使用示例数据。", error);
+    }
+
+    try {
+      const savedAiSettings = JSON.parse(localStorage.getItem(aiSettingsStorageKey) || "null");
+      if (savedAiSettings) aiSettings = { ...aiSettings, ...savedAiSettings };
+    } catch (error) {
+      console.info("AI 服务设置读取失败，将使用本地演示。", error);
     }
 
     state.footprints = state.footprints.map(item => ({ ...item, stage: item.stage || "fragment" }));
@@ -1675,7 +1721,159 @@
       }
     }
 
+    function persistAiSettings() {
+      try {
+        localStorage.setItem(aiSettingsStorageKey, JSON.stringify(aiSettings));
+      } catch (error) {
+        console.info("AI 服务设置保存失败。", error);
+      }
+    }
+
+    function openAiSettings() {
+      byId("aiEndpointInput").value = aiSettings.endpoint || "";
+      byId("aiAgentIdInput").value = aiSettings.agentId || "";
+      byId("aiTokenInput").value = aiSettings.token || "";
+      byId("aiSettingsModal").classList.remove("hidden");
+    }
+
+    function closeAiSettings() {
+      byId("aiSettingsModal").classList.add("hidden");
+    }
+
+    function isAiConnected() {
+      return Boolean(aiSettings.enabled && aiSettings.endpoint);
+    }
+
+    function updateAiConnectionStatus(message) {
+      const status = byId("aiConnectionStatus");
+      if (message) {
+        status.textContent = message;
+        return;
+      }
+      status.textContent = isAiConnected() ? "已连接飞书 AI：追问、表达检查与草稿评估将使用实时生成" : "当前使用本地演示逻辑";
+    }
+
+    function resetAiSession() {
+      generatedPrompts = null;
+      aiSummary = "";
+    }
+
+    function aiContext() {
+      const goal = studioMode === "exam" ? (byId("studioGoal")?.value || "ielts-speaking") : "free";
+      return {
+        mode: studioMode || "free",
+        goal,
+        source: byId("studioSource")?.value || "feeling",
+        topic: byId("studioText")?.value.trim() || "",
+        examQuestion: studioMode === "exam" ? (byId("examQuestion")?.value || "") : "",
+        footprints: selectedFootprints().map(({ type, text, tags, date }) => ({ type, text, tags, date })),
+        answers: state.answers.filter(Boolean)
+      };
+    }
+
+    async function requestAi(action, context) {
+      if (!isAiConnected()) return null;
+      const headers = { "Content-Type": "application/json" };
+      if (aiSettings.token) headers.Authorization = `Bearer ${aiSettings.token}`;
+      const response = await fetch(aiSettings.endpoint, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({ action, agentId: aiSettings.agentId || undefined, context })
+      });
+      if (!response.ok) throw new Error(`AI 服务返回 ${response.status}`);
+      return response.json();
+    }
+
+    function responseValue(response, key) {
+      if (!response || typeof response !== "object") return null;
+      return response[key] || response.data?.[key] || response.result?.[key] || null;
+    }
+
+    function normalizedList(value) {
+      if (!Array.isArray(value)) return [];
+      return value.map(item => typeof item === "string" ? item : item?.text || item?.content || "")
+        .map(item => String(item).trim())
+        .filter(Boolean);
+    }
+
+    function reviewText(review) {
+      if (typeof review === "string") return review.trim();
+      if (!review || typeof review !== "object") return "";
+      const parts = [review.summary, review.overview, review.feedback, review.comment]
+        .filter(value => typeof value === "string" && value.trim());
+      const suggestions = normalizedList(review.suggestions || review.advice || review.actions);
+      return [...parts, ...suggestions].filter(Boolean).join("；");
+    }
+
+    function languageSupport(response) {
+      const support = responseValue(response, "languageSupport") || responseValue(response, "language_support") || [];
+      if (!Array.isArray(support)) return [];
+      return support.map(item => {
+        if (typeof item === "string") return { expression: item, note: "来自教材语言包" };
+        return {
+          expression: item.expression || item.text || item.phrase || "",
+          note: [item.meaning, item.note, item.source, item.page ? `第 ${item.page} 页` : ""].filter(Boolean).join(" · ") || "来自教材语言包"
+        };
+      }).filter(item => item.expression);
+    }
+
+    function localExpressionReview(value) {
+      const suggestions = [];
+      if (value.length < 80) suggestions.push("补充一个具体场景、人物或动作，让表达更有画面");
+      if (!/我|my|I\b/i.test(value)) suggestions.push("加入与你有关的经历，让观点回到真实生活");
+      if (!/[。.!?？]$/.test(value)) suggestions.push("用一句结论收束，让听者知道你最终形成了什么判断");
+      if (!suggestions.length) suggestions.push("保留这段真实经历，再检查观点、例子和结论之间的连接");
+      return `表达检查：${suggestions.slice(0, 3).join("；")}`;
+    }
+
+    function localScoreReview(draft) {
+      const details = [
+        "内容：已保留个人观点，下一步可补充一个更具体的细节",
+        "结构：检查开场、经历与结尾之间是否有清晰连接",
+        "语言：优先替换一到两个重复词，让表达保持自然"
+      ];
+      return `AI 表达评估（演示）：${details.join("；")}。当前草稿共 ${draft.length} 字。`;
+    }
+
+    async function loadAiQuestions() {
+      if (!isAiConnected()) return;
+      updateAiConnectionStatus("AI 正在根据你的足迹准备追问…");
+      try {
+        const response = await requestAi("ask_questions", aiContext());
+        const questions = normalizedList(responseValue(response, "questions"));
+        if (questions.length >= 3) {
+          generatedPrompts = questions.slice(0, 3);
+          if (generatedPrompts.length === 3) renderQuestions();
+        }
+        updateAiConnectionStatus();
+      } catch (error) {
+        console.info("AI 追问暂时不可用，将使用本地演示逻辑。", error);
+        updateAiConnectionStatus("AI 服务暂时不可用，已切换为本地演示追问");
+      }
+    }
+
+    async function reviewExpression(value) {
+      if (!isAiConnected()) return localExpressionReview(value);
+      try {
+        const response = await requestAi("review_expression", { ...aiContext(), expression: value });
+        const review = responseValue(response, "review") || responseValue(response, "feedback") || responseValue(response, "result");
+        const summary = responseValue(response, "summary");
+        if (typeof summary === "string" && summary.trim()) {
+          aiSummary = summary.trim();
+          renderAnswerSummary();
+        }
+        const support = languageSupport(response);
+        if (support.length) renderLanguageSupport(support);
+        return reviewText(review) || localExpressionReview(value);
+      } catch (error) {
+        console.info("AI 表达检查暂时不可用，将使用本地演示逻辑。", error);
+        updateAiConnectionStatus("AI 服务暂时不可用，已切换为本地表达检查");
+        return localExpressionReview(value);
+      }
+    }
+
     function currentPrompts() {
+      if (generatedPrompts?.length === 3) return generatedPrompts;
       const goal = studioMode === "exam" ? (byId("studioGoal")?.value || "ielts-speaking") : "free";
       const source = byId("studioSource").value;
       const set = goalPrompts[goal] || goalPrompts.free;
@@ -1699,6 +1897,7 @@
 
     function setStudioMode(mode) {
       studioMode = mode;
+      resetAiSession();
       document.querySelectorAll("[data-studio-mode]").forEach(button => {
         const active = button.dataset.studioMode === mode;
         button.classList.toggle("active", active);
@@ -1724,6 +1923,7 @@
 
     function showStudioChooser() {
       studioMode = null;
+      resetAiSession();
       byId("studioStartPanel").classList.remove("hidden");
       byId("studioWorkspace").classList.add("hidden");
       byId("dialoguePanel").classList.add("hidden");
@@ -2086,6 +2286,16 @@
       persistState();
     }
 
+    function renderLanguageSupport(cards) {
+      byId("languageCards").innerHTML = cards.slice(0, 3).map(card => `
+        <article class="quote">
+          <strong>教材语言建议</strong>
+          <p style="margin:8px 0 0; color:var(--view-accent);">${escapeHtml(card.expression)}</p>
+          <span class="draft-meta">${escapeHtml(card.note)}</span>
+        </article>
+      `).join("");
+    }
+
     function renderLanguagePanel() {
       const goal = studioMode === "exam" ? (byId("studioGoal")?.value || "ielts-speaking") : "free";
       const goalLabel = goalLabels[goal] || goalLabels.free;
@@ -2112,12 +2322,19 @@
 
     function renderAnswerSummary() {
       const labels = ["观点或回应", "经历、理由或例子", "结论或进一步思考"];
-      byId("answerSummary").innerHTML = labels.map((label, index) => `
+      const answers = labels.map((label, index) => `
         <div class="answer-summary-item">
           <strong>${label}</strong>
           <p>${escapeHtml(state.answers[index] || "这一部分还没有填写，可以回到问题页补充。")}</p>
         </div>
       `).join("");
+      const aiSummaryCard = aiSummary ? `
+        <div class="answer-summary-item">
+          <strong>AI 整理</strong>
+          <p>${escapeHtml(aiSummary)}</p>
+        </div>
+      ` : "";
+      byId("answerSummary").innerHTML = answers + aiSummaryCard;
     }
 
     function generateExpression(recordActivity = true) {
@@ -2159,12 +2376,27 @@
       byId("draftMeta").textContent = `· ${format} · ${estimate}`;
     }
 
-    function runAiReview() {
+    async function runAiReview() {
       const draft = byId("draftText").value.trim();
       byId("aiReviewPanel").classList.remove("hidden");
-      byId("aiReviewResult").textContent = draft
-        ? "AI 评分与修改入口已开启。评分维度和具体建议将在接入真题评价标准后显示。当前先保留你的草稿内容，方便继续修改。"
-        : "请先补充草稿内容，再开启 AI 评分与修改。";
+      if (!draft) {
+        byId("aiReviewResult").textContent = "请先补充草稿内容，再开启 AI 表达评估。";
+        return;
+      }
+      byId("aiReviewResult").textContent = "AI 正在评估内容、结构、语言和表达具体性…";
+      if (!isAiConnected()) {
+        byId("aiReviewResult").textContent = localScoreReview(draft);
+        return;
+      }
+      try {
+        const response = await requestAi("score_expression", { ...aiContext(), draft });
+        const review = responseValue(response, "score") || responseValue(response, "review") || responseValue(response, "feedback") || responseValue(response, "result");
+        byId("aiReviewResult").textContent = reviewText(review) || localScoreReview(draft);
+      } catch (error) {
+        console.info("AI 草稿评估暂时不可用，将使用本地演示逻辑。", error);
+        updateAiConnectionStatus("AI 服务暂时不可用，已切换为本地草稿评估");
+        byId("aiReviewResult").textContent = localScoreReview(draft);
+      }
     }
 
     function titleFromClaim(claim, tags) {
@@ -2394,10 +2626,11 @@
       closeFootprintChooser();
     });
 
-    byId("startDialogueBtn").addEventListener("click", () => {
+    byId("startDialogueBtn").addEventListener("click", async () => {
       if (studioMode === "exam") {
         byId("studioText").value = `我想回答这道真题：${byId("examQuestion").value}`;
       }
+      resetAiSession();
       state.questionIndex = 0;
       state.answers = ["", "", ""];
       byId("dialoguePanel").classList.remove("hidden");
@@ -2405,6 +2638,9 @@
       byId("draftPanel").classList.add("hidden");
       renderQuestions();
       addActivity(1);
+      byId("startDialogueBtn").disabled = true;
+      await loadAiQuestions();
+      byId("startDialogueBtn").disabled = false;
     });
 
     byId("prevQuestionBtn").addEventListener("click", () => {
@@ -2457,6 +2693,7 @@
     byId("studioSource").addEventListener("change", () => {
       state.questionIndex = 0;
       state.answers = ["", "", ""];
+      resetAiSession();
       updateEntryHint();
       if (!byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
     });
@@ -2464,6 +2701,7 @@
     byId("studioGoal").addEventListener("change", () => {
       state.questionIndex = 0;
       state.answers = ["", "", ""];
+      resetAiSession();
       updateEntryHint();
       if (!byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
     });
@@ -2475,17 +2713,22 @@
     byId("changeStudioModeBtn").addEventListener("click", showStudioChooser);
 
     byId("examQuestion").addEventListener("change", () => {
+      resetAiSession();
       if (studioMode === "exam" && !byId("dialoguePanel").classList.contains("hidden")) renderQuestions();
     });
 
-    byId("checkLanguageBtn").addEventListener("click", () => {
+    byId("checkLanguageBtn").addEventListener("click", async () => {
       const value = byId("translationBox").value.trim();
-      byId("languageFeedback").textContent = value
-        ? "建议：保留你的具体经历，再补充一个连接词或因果句，让观点、例子和结论形成清晰结构。"
-        : "先写下一句你真正想表达的话，再开始修改。";
-      if (value) {
-        generateExpression();
+      if (!value) {
+        byId("languageFeedback").textContent = "先写下一句你真正想表达的话，再开始检查。";
+        return;
       }
+      byId("checkLanguageBtn").disabled = true;
+      byId("languageFeedback").textContent = isAiConnected() ? "AI 正在检查表达是否清楚、具体且保留了你的经历…" : "正在整理这次表达的修改建议…";
+      const feedback = await reviewExpression(value);
+      byId("languageFeedback").textContent = feedback;
+      byId("checkLanguageBtn").disabled = false;
+      generateExpression();
     });
 
     byId("formatSelect").addEventListener("change", () => {
@@ -2496,12 +2739,37 @@
 
     byId("draftClaim").addEventListener("input", () => fitTextarea(byId("draftClaim"), 72, 220));
     byId("draftText").addEventListener("input", () => fitTextarea(byId("draftText"), 120, 560));
-    byId("enableAiReview").addEventListener("change", event => {
+    byId("enableAiReview").addEventListener("change", async event => {
       if (event.target.checked) {
-        runAiReview();
+        await runAiReview();
       } else {
         byId("aiReviewPanel").classList.add("hidden");
       }
+    });
+
+    byId("aiSettingsBtn").addEventListener("click", openAiSettings);
+    byId("closeAiSettingsBtn").addEventListener("click", closeAiSettings);
+    byId("aiSettingsModal").addEventListener("click", event => {
+      if (event.target === byId("aiSettingsModal")) closeAiSettings();
+    });
+    byId("saveAiSettingsBtn").addEventListener("click", () => {
+      const endpoint = byId("aiEndpointInput").value.trim();
+      aiSettings = {
+        enabled: Boolean(endpoint),
+        endpoint,
+        agentId: byId("aiAgentIdInput").value.trim(),
+        token: byId("aiTokenInput").value.trim()
+      };
+      persistAiSettings();
+      updateAiConnectionStatus();
+      closeAiSettings();
+    });
+    byId("disableAiSettingsBtn").addEventListener("click", () => {
+      aiSettings = { enabled: false, endpoint: "", agentId: "", token: "" };
+      persistAiSettings();
+      resetAiSession();
+      updateAiConnectionStatus();
+      closeAiSettings();
     });
 
     byId("closeReaderBtn").addEventListener("click", closeReader);
@@ -2551,6 +2819,7 @@
     renderAll();
     applyViewTheme(state.view);
     updateEntryHint();
+    updateAiConnectionStatus();
   </script>
 </body>
 </html>
