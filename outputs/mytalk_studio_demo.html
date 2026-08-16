@@ -1639,7 +1639,10 @@
 
     const byId = id => document.getElementById(id);
     const storageKey = "mytalk-studio-state-v3";
-    const AI_CONFIG = window.MYTALK_AI_CONFIG || {};
+    const AI_CONFIG = window.MYTALK_AI_CONFIG || {
+      enabled: true,
+      endpoint: "/api/mytalk"
+    };
     const defaultAiSettings = {
       enabled: Boolean(AI_CONFIG.enabled && AI_CONFIG.endpoint),
       endpoint: AI_CONFIG.endpoint || "",

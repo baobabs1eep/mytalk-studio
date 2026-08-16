@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/outputs/mytalk_studio_demo.html"
+    }
+  ]
+}
