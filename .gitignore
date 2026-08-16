@@ -5,6 +5,8 @@ Thumbs.db
 # Local build and review files
 work/
 *.tmp
+.env
+.env.local
 
 # Personal and generated documents are not part of the public project repository
 outputs/*.docx

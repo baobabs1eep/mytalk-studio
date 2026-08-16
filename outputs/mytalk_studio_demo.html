@@ -1631,9 +1631,9 @@
     };
 
     const viewThemes = {
-      footprints: { deep: "#698e6a", pale: "#c9cfc1", paper: "#fbfbf4", accent: "#4f7657", ink: "#31483a", soft: "rgba(105, 142, 106, .16)", wash: "rgba(105, 142, 106, .13)" },
-      studio: { deep: "#012696", pale: "#a4e2c6", paper: "#f5fbf5", accent: "#012696", ink: "#10255e", soft: "rgba(164, 226, 198, .22)", wash: "rgba(130, 171, 204, .15)" },
-      library: { deep: "#82abcc", pale: "#f3bf4c", paper: "#fff9e8", accent: "#2f90b9", ink: "#31566d", soft: "rgba(243, 191, 76, .2)", wash: "rgba(130, 171, 204, .16)" },
+      footprints: { deep: "#7891ad", pale: "#d9e1e3", paper: "#f8f8f3", accent: "#657f9d", ink: "#455467", soft: "rgba(120, 145, 173, .16)", wash: "rgba(120, 145, 173, .12)" },
+      studio: { deep: "#827da9", pale: "#dedbea", paper: "#faf9f8", accent: "#716b98", ink: "#514d6d", soft: "rgba(130, 125, 169, .15)", wash: "rgba(130, 125, 169, .12)" },
+      library: { deep: "#7694ae", pale: "#dce2e2", paper: "#faf9f6", accent: "#68849d", ink: "#4d6374", soft: "rgba(118, 148, 174, .15)", wash: "rgba(118, 148, 174, .12)" },
       growth: { deep: "#7c739f", pale: "#e5dfd5", paper: "#fbfaf6", accent: "#7c739f", ink: "#514d6d", soft: "rgba(124, 115, 159, .16)", wash: "rgba(124, 115, 159, .13)" }
     };
 
@@ -1951,6 +1951,11 @@
     function applyViewTheme(id) {
       const theme = viewThemes[id] || viewThemes.footprints;
       const root = document.documentElement.style;
+      const growthBase = id === "growth";
+      const base = growthBase
+        ? { bg: "#f4f1e8", panel: "#fffdf5", panelSoft: "#f4f1e8", ink: "#2b2924", muted: "#746d61", line: "#ddd6c8", red: "#ed9874", orange: "#f3bf4c", yellow: "#e9eeb9", green: "#698e6a", blue: "#2f90b9", violet: "#7c739f" }
+        : { bg: "#f4f1e8", panel: "#fffdf5", panelSoft: "#f4f1e8", ink: "#2b2924", muted: "#746d61", line: "#ddd6c8", red: "#ed9874", orange: "#f3bf4c", yellow: "#e9eeb9", green: "#698e6a", blue: "#2f90b9", violet: "#7c739f" };
+      Object.entries({ bg: base.bg, panel: base.panel, "panel-soft": base.panelSoft, ink: base.ink, muted: base.muted, line: base.line, red: base.red, orange: base.orange, yellow: base.yellow, green: base.green, blue: base.blue, violet: base.violet }).forEach(([name, value]) => root.setProperty(`--${name}`, value));
       root.setProperty("--view-deep", theme.deep);
       root.setProperty("--view-pale", theme.pale);
       root.setProperty("--view-paper", theme.paper);
@@ -2726,7 +2731,444 @@
       closeProfileEditor();
     });
 
+    function initializeExtensionFeatures() {
+      const extensionStyle = document.createElement("style");
+      extensionStyle.textContent = `
+        .content-zone { display: grid; gap: 12px; }
+        .content-zone + .content-zone { margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--line); }
+        .content-zone-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+        .content-zone-heading h3 { margin: 0; font-size: 18px; }
+        .content-zone-heading p { margin: 0; color: var(--muted); font-size: 13px; }
+        .reference-card { display: grid; gap: 8px; padding: 12px 13px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel-soft); }
+        .reference-card strong { color: var(--view-ink); }
+        .reference-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.6; }
+        .reference-card a { color: var(--view-accent); font-size: 13px; font-weight: 700; }
+        .reference-picker { display: grid; gap: 10px; }
+        .reference-picker .empty { padding: 14px; text-align: left; }
+        .ted-favorite-mark { color: #8a641a; font-size: 12px; font-weight: 800; }
+        .attachment-note { margin: 0; color: var(--muted); font-size: 12px; }
+        .reference-card img { width: 100%; max-height: 220px; object-fit: cover; border: 1px solid var(--line); border-radius: calc(var(--radius) - 2px); }
+        .footprint-groups { display: grid; gap: 24px; }
+        .footprint-group + .footprint-group { padding-top: 22px; border-top: 1px solid var(--line); }
+        .footprint-group-heading { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+        .footprint-group-heading h4 { margin: 0; color: var(--view-ink); font-size: 16px; }
+        .footprint-group-heading p { margin: 0; color: var(--muted); font-size: 13px; }
+        .mini.danger { border-color: rgba(150, 81, 58, .28); background: #fff0ec; color: #96513a; }
+        body { background: radial-gradient(circle at 18% 10%, var(--view-wash) 0%, transparent 28%), linear-gradient(180deg, var(--view-paper) 0%, var(--bg) 300px), var(--bg); }
+        aside { border-right-color: rgba(81, 74, 98, .16); background: radial-gradient(circle at 24% 12%, rgba(124, 115, 159, .12), transparent 34%), linear-gradient(180deg, #f8f6f0 0%, #e9e5ee 100%); }
+        .nav button:nth-child(1) { --nav-fill: #8b9fbb; --nav-active: #647d9e; --nav-wash: rgba(100, 125, 158, .14); }
+        .nav button:nth-child(2) { --nav-fill: #9992b8; --nav-active: #756d98; --nav-wash: rgba(117, 109, 152, .14); }
+        .nav button:nth-child(3) { --nav-fill: #8499b7; --nav-active: #627b9c; --nav-wash: rgba(98, 123, 156, .14); }
+        .nav button:nth-child(4) { --nav-fill: #8a83aa; --nav-active: #6c6590; --nav-wash: rgba(108, 101, 144, .14); }
+        .nav button:nth-child(5) { --nav-fill: #9189a9; --nav-active: #625b7a; --nav-wash: rgba(145, 137, 169, .14); }
+        .panel, .card, .library-card, .draft-card { background: linear-gradient(180deg, #fbfaf6 0%, var(--view-paper) 100%); }
+        .mode-choice, .answer-summary-item, input, textarea, select { background: #fbfaf6; }
+        .secondary, .mini, .tag.filter { background: #f1efe8; }
+        .note { background: linear-gradient(180deg, #fbfaf6 0%, var(--view-paper) 100%); }
+        .collected-note { background: linear-gradient(180deg, #fbfaf6 0%, #f0edf2 100%); }
+        .modal { background: radial-gradient(circle at 28% 18%, rgba(151, 142, 177, .2), transparent 32%), rgba(78, 73, 91, .34); }
+        .modal-card { background: linear-gradient(135deg, #fbfaf6 0%, #eeeaf0 58%, #e3e0ea 100%); border-color: #d4cedd; box-shadow: 0 28px 70px rgba(77, 70, 91, .2); }
+        .modal-card h2 { color: #3f3b4e; }
+        .modal-card p { color: #686175; }
+        .modal-card .tag { background: rgba(248, 246, 240, .82); color: #655d82; border-color: rgba(124, 115, 159, .24); }
+        .modal-card .primary { background: #7c739f; box-shadow: 0 12px 28px rgba(124, 115, 159, .22); }
+        .modal-card .secondary { background: #f4f1e8; border-color: #d7d0df; color: #514d6d; }
+        .modal-note { color: #746d7f; }
+        #growth .panel, #growth .card, #growth .library-card, #growth .draft-card { background: var(--panel); }
+        #growth .secondary, #growth .mini { background: #fffaf0; }
+        .nav button:nth-child(3) { --nav-fill: #c9a45f; --nav-active: #896629; --nav-wash: rgba(201, 164, 95, .15); }
+        .nav button:nth-child(4) { --nav-fill: #6f91a8; --nav-active: #405f78; --nav-wash: rgba(111, 145, 168, .14); }
+        .nav button:nth-child(5) { --nav-fill: #9189a9; --nav-active: #625b7a; --nav-wash: rgba(145, 137, 169, .14); }
+        @media (max-width: 1060px) { .nav { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+      `;
+      document.head.appendChild(extensionStyle);
+
+      const nav = document.querySelector(".nav");
+      const libraryNav = nav.querySelector('[data-view="library"]');
+      const tedNav = document.createElement("button");
+      tedNav.type = "button";
+      tedNav.dataset.view = "ted-inspiration";
+      tedNav.innerHTML = "<span>3</span><span>TED 灵感入口</span>";
+      nav.insertBefore(tedNav, libraryNav);
+      Array.from(nav.querySelectorAll("button")).forEach((button, index) => {
+        const number = button.querySelector("span:first-child");
+        if (number) number.textContent = String(index + 1);
+        if (button.dataset.view === "library") button.querySelector("span:last-child").textContent = "思想图书馆";
+        if (button.dataset.view === "growth") button.querySelector("span:last-child").textContent = "成长";
+      });
+      tedNav.addEventListener("click", () => showView("ted-inspiration"));
+
+      const tedView = document.createElement("section");
+      tedView.className = "view";
+      tedView.id = "ted-inspiration";
+      tedView.innerHTML = `
+        <div class="panel">
+          <span class="tag orange">TED 灵感入口</span>
+          <h3 style="margin-top:10px;">把值得回看的演讲留在自己的灵感库</h3>
+          <p class="section-note">收藏演讲后，可以在自由表达中直接引用，并让引用随作品一起分享到思想图书馆或存为足迹。</p>
+        </div>
+        <div class="grid three" id="tedTalkGrid"></div>
+        <div class="panel">
+          <div class="section-heading"><div><h3>我的 TED 收藏</h3><p class="section-note">收藏的演讲会出现在自由表达的引用列表中。</p></div></div>
+          <div class="field" style="margin-top:14px;"><label for="tedSearch">查找已收藏 TED 演讲</label><input id="tedSearch" type="search" placeholder="按演讲题目或演讲者搜索"></div>
+          <div class="grid three" id="tedFavoritesGrid" style="margin-top:14px;"></div>
+        </div>`;
+      byId("studio").before(tedView);
+      const legacyTedPanel = document.querySelector("[data-ted-prompt]")?.closest(".panel");
+      if (legacyTedPanel) legacyTedPanel.remove();
+
+      const freePanel = byId("freePathPanel");
+      const studioTextField = byId("studioText").closest(".field");
+      const tedReferencePanel = document.createElement("div");
+      tedReferencePanel.className = "field hidden";
+      tedReferencePanel.id = "tedReferencePanel";
+      tedReferencePanel.innerHTML = `<label for="tedReferenceSelect">引用收藏里对应的 TED 演讲视频</label><div class="reference-picker"><select id="tedReferenceSelect"></select><div id="tedReferencePreview"></div></div>`;
+      const replySourcePanel = document.createElement("div");
+      replySourcePanel.className = "field hidden";
+      replySourcePanel.id = "replySourcePanel";
+      replySourcePanel.innerHTML = `
+        <label for="replyViewpoint">你想反驳的观点是什么</label>
+        <textarea id="replyViewpoint" placeholder="写下要回应或反驳的观点，也可以摘录原文。"></textarea>
+        <div class="grid two">
+          <div class="field"><label for="replySourceLink">图片或原文链接</label><input id="replySourceLink" type="url" placeholder="粘贴图片、文章或视频链接"></div>
+          <div class="field"><label for="replyImageUpload">上传图片</label><input id="replyImageUpload" type="file" accept="image/*"><p class="attachment-note" id="replyAttachmentNote">可上传截图，或粘贴链接作为引用素材。</p></div>
+        </div>`;
+      freePanel.insertBefore(tedReferencePanel, studioTextField);
+      freePanel.insertBefore(replySourcePanel, studioTextField);
+
+      state.tedFavorites = Array.isArray(state.tedFavorites) ? state.tedFavorites : [];
+      state.tedReferenceId = state.tedReferenceId || null;
+      state.replyMaterial = state.replyMaterial || { viewpoint: "", link: "", attachmentName: "", imageData: "" };
+      state.tedTalks = [
+        { id: "ken-robinson", title: "Do schools kill creativity?", speaker: "Ken Robinson", url: "https://www.ted.com/talks/sir_ken_robinson_do_schools_kill_creativity", description: "重新理解教育如何保护好奇心、创造力与个人表达。" },
+        { id: "chimamanda-adichie", title: "The danger of a single story", speaker: "Chimamanda Ngozi Adichie", url: "https://www.ted.com/talks/chimamanda_adichie_the_danger_of_a_single_story", description: "从单一叙事出发，重新审视偏见、身份和讲述自己故事的权利。" },
+        { id: "sugata-mitra", title: "Build a School in the Cloud", speaker: "Sugata Mitra", url: "https://www.ted.com/talks/sugata_mitra_build_a_school_in_the_cloud", description: "关于自主学习、提问和技术如何改变学习关系的观察。" }
+      ];
+
+      const originalViewMeta = viewMeta;
+      originalViewMeta["ted-inspiration"] = ["TED 灵感入口", "收藏、回看并引用让你想继续思考的 TED 演讲。"];
+      viewThemes["ted-inspiration"] = { deep: "#8a7ca3", pale: "#e1dce5", paper: "#faf9f6", accent: "#776a91", ink: "#514d6d", soft: "rgba(138, 124, 163, .15)", wash: "rgba(138, 124, 163, .12)" };
+
+      byId("studioSource").addEventListener("change", renderStudioReferenceFields);
+      byId("tedReferenceSelect").addEventListener("change", event => {
+        state.tedReferenceId = event.target.value || null;
+        renderStudioReferenceFields();
+        persistState();
+      });
+      byId("replyViewpoint").addEventListener("input", event => {
+        state.replyMaterial.viewpoint = event.target.value;
+        persistState();
+      });
+      byId("replySourceLink").addEventListener("input", event => {
+        state.replyMaterial.link = event.target.value;
+        persistState();
+      });
+      byId("replyImageUpload").addEventListener("change", event => {
+        const file = event.target.files && event.target.files[0];
+        state.replyMaterial.attachmentName = file ? file.name : "";
+        if (!file) {
+          state.replyMaterial.imageData = "";
+          byId("replyAttachmentNote").textContent = "可上传截图，或粘贴链接作为引用素材。";
+          persistState();
+          return;
+        }
+        if (file.size > 1500000) {
+          state.replyMaterial.imageData = "";
+          byId("replyAttachmentNote").textContent = `已选择 ${file.name}，图片较大，保存时将保留文件名。`;
+          persistState();
+          return;
+        }
+        const reader = new FileReader();
+        reader.addEventListener("load", () => {
+          state.replyMaterial.imageData = String(reader.result || "");
+          byId("replyAttachmentNote").textContent = `已附带图片：${file.name}`;
+          persistState();
+        });
+        reader.readAsDataURL(file);
+      });
+      byId("tedSearch").addEventListener("input", renderTedInspiration);
+
+      // Replace the original share/save handlers at capture time so references travel with saved content.
+      byId("shareDraftBtn").addEventListener("click", event => {
+        event.stopImmediatePropagation();
+        const remembered = selectedFootprints();
+        const refs = currentDraftReferences();
+        const tags = [...new Set([...remembered.flatMap(item => item.tags), ...refs.flatMap(ref => ref.tags || [])])].slice(0, 5);
+        state.library.unshift({
+          id: Math.max(0, ...state.library.map(item => item.id || 0)) + 1,
+          title: byId("draftTitle").value.trim() || "未命名表达",
+          claim: byId("draftClaim").value.trim() || "我的表达",
+          text: byId("draftText").value.trim(),
+          tags: tags.length ? tags : ["MyTalk"],
+          author: "我",
+          same: 0,
+          ask: 0,
+          zone: studioMode === "exam" ? "exam" : "free",
+          references: refs
+        });
+        state.shared += 1;
+        addActivity(1);
+        renderAll();
+        showView("library");
+      }, true);
+
+      byId("saveDraftFootprintBtn").addEventListener("click", event => {
+        event.stopImmediatePropagation();
+        const text = byId("draftClaim").value.trim() || byId("draftText").value.trim();
+        addFootprint(text, ["表达", "已成稿"], "表达工坊", currentDraftReferences());
+        state.footprints[0].stage = "draft";
+        renderAll();
+        persistState();
+        showView("footprints");
+      }, true);
+
+      byId("checkLanguageBtn").addEventListener("click", () => setTimeout(refreshDraftReferences, 0));
+      byId("formatSelect").addEventListener("change", () => setTimeout(refreshDraftReferences, 0));
+      renderStudioReferenceFields();
+    }
+
+    function getTedTalk(id) {
+      return (state.tedTalks || []).find(talk => talk.id === id);
+    }
+
+    function renderTedInspiration() {
+      if (!byId("tedTalkGrid")) return;
+      const makeCard = talk => {
+        const saved = state.tedFavorites.includes(talk.id);
+        return `<article class="library-card"><div class="post-cover"><span class="tag orange">TED 演讲</span><span class="cover-title">${escapeHtml(talk.title)}</span><p>${escapeHtml(talk.speaker)}</p></div><p class="post-snippet">${escapeHtml(talk.description)}</p><div class="actions"><a class="mini" href="${escapeAttr(talk.url)}" target="_blank" rel="noreferrer">观看演讲</a><button class="mini" data-ted-favorite="${escapeAttr(talk.id)}">${saved ? "已收藏" : "收藏演讲"}</button><button class="mini" data-use-ted="${escapeAttr(talk.id)}">引用到自由表达</button></div></article>`;
+      };
+      byId("tedTalkGrid").innerHTML = state.tedTalks.map(makeCard).join("");
+      const query = byId("tedSearch")?.value.trim().toLowerCase() || "";
+      const favorites = state.tedTalks.filter(talk => state.tedFavorites.includes(talk.id) && `${talk.title} ${talk.speaker}`.toLowerCase().includes(query));
+      byId("tedFavoritesGrid").innerHTML = favorites.map(makeCard).join("") || `<div class="empty">还没有收藏演讲。收藏后可在“把 TED 感受变成自己的话”中引用。</div>`;
+      document.querySelectorAll("[data-ted-favorite]").forEach(button => button.addEventListener("click", () => {
+        const id = button.dataset.tedFavorite;
+        state.tedFavorites = state.tedFavorites.includes(id) ? state.tedFavorites.filter(value => value !== id) : [id, ...state.tedFavorites];
+        if (!state.tedFavorites.includes(state.tedReferenceId)) state.tedReferenceId = null;
+        persistState();
+        renderTedInspiration();
+        renderStudioReferenceFields();
+      }));
+      document.querySelectorAll("[data-use-ted]").forEach(button => button.addEventListener("click", () => {
+        const id = button.dataset.useTed;
+        if (!state.tedFavorites.includes(id)) state.tedFavorites = [id, ...state.tedFavorites];
+        state.tedReferenceId = id;
+        byId("studioSource").value = "ted";
+        showView("studio");
+        setStudioMode("free");
+        renderStudioReferenceFields();
+        persistState();
+      }));
+    }
+
+    function renderStudioReferenceFields() {
+      const source = byId("studioSource")?.value;
+      const tedPanel = byId("tedReferencePanel");
+      const replyPanel = byId("replySourcePanel");
+      if (!tedPanel || !replyPanel) return;
+      tedPanel.classList.toggle("hidden", source !== "ted");
+      replyPanel.classList.toggle("hidden", source !== "reply");
+      if (source === "ted") {
+        const savedTalks = state.tedTalks.filter(talk => state.tedFavorites.includes(talk.id));
+        const select = byId("tedReferenceSelect");
+        select.innerHTML = `<option value="">选择一段已收藏演讲</option>${savedTalks.map(talk => `<option value="${escapeAttr(talk.id)}">${escapeHtml(talk.title)} - ${escapeHtml(talk.speaker)}</option>`).join("")}`;
+        if (savedTalks.some(talk => talk.id === state.tedReferenceId)) select.value = state.tedReferenceId;
+        const talk = getTedTalk(state.tedReferenceId);
+        byId("tedReferencePreview").innerHTML = talk ? `<div class="reference-card"><strong>${escapeHtml(talk.title)}</strong><p>${escapeHtml(talk.speaker)} · ${escapeHtml(talk.description)}</p><a href="${escapeAttr(talk.url)}" target="_blank" rel="noreferrer">查看引用的 TED 演讲</a></div>` : `<div class="empty">先到 TED 灵感入口收藏演讲，再在这里选择引用内容。</div>`;
+      }
+      if (source === "reply") {
+        byId("replyViewpoint").value = state.replyMaterial.viewpoint || "";
+        byId("replySourceLink").value = state.replyMaterial.link || "";
+        byId("replyAttachmentNote").textContent = state.replyMaterial.attachmentName ? `已附带图片：${state.replyMaterial.attachmentName}` : "可上传截图，或粘贴链接作为引用素材。";
+      }
+    }
+
+    function currentDraftReferences() {
+      const references = [];
+      if (studioMode === "free" && byId("studioSource")?.value === "ted") {
+        const talk = getTedTalk(state.tedReferenceId);
+        if (talk) references.push({ type: "ted", title: talk.title, subtitle: talk.speaker, url: talk.url, tags: ["TED", "引用演讲"] });
+      }
+      if (studioMode === "free" && byId("studioSource")?.value === "reply") {
+        const material = state.replyMaterial || {};
+        if (material.viewpoint || material.link || material.attachmentName) references.push({ type: "reply", title: material.viewpoint || "待反驳观点", subtitle: [material.link, material.attachmentName].filter(Boolean).join(" · "), url: material.link || "", imageData: material.imageData || "", tags: ["观点回应", "引用素材"] });
+      }
+      return references;
+    }
+
+    function renderReferences(references) {
+      return (references || []).map(reference => `<div class="reference-card"><strong>${reference.type === "ted" ? "TED 引用" : "反驳素材"} · ${escapeHtml(reference.title)}</strong>${reference.subtitle ? `<p>${escapeHtml(reference.subtitle)}</p>` : ""}${reference.imageData ? `<img src="${escapeAttr(reference.imageData)}" alt="引用的图片素材">` : ""}${reference.url ? `<a href="${escapeAttr(reference.url)}" target="_blank" rel="noreferrer">打开引用内容</a>` : ""}</div>`).join("");
+    }
+
+    function refreshDraftReferences() {
+      const references = currentDraftReferences();
+      state.draftReferences = references;
+      if (!byId("draftPanel").classList.contains("hidden")) {
+        const existing = selectedFootprints().map(item => `<div class="quote">${escapeHtml(item.text)}</div>`).join("");
+        byId("usedMaterial").innerHTML = `${existing}${renderReferences(references)}` || `<div class="empty">暂未引用素材。</div>`;
+      }
+    }
+
+    function renderLibrary() {
+      const zones = [
+        { id: "free", title: "自由表达区", note: "从个人感受、TED 灵感与观点回应出发的表达。" },
+        { id: "exam", title: "真题训练区", note: "围绕雅思、托福等真实题目完成的训练表达。" }
+      ];
+      const card = (item, index) => `<article class="library-card"><button class="post-cover cover-button" data-read="${index}" aria-label="阅读:${escapeAttr(item.title)}"><span class="tag">${escapeHtml(item.author)}</span><span class="cover-title">${escapeHtml(item.title)}</span><p>${escapeHtml(item.claim)}</p></button><p class="post-snippet">${escapeHtml(item.text.slice(0, 120))}${item.text.length > 120 ? "…" : ""}</p>${renderReferences(item.references)}<div class="tag-row">${item.tags.map(tag => `<span class="tag ${colorClass(tag)}">${escapeHtml(tag)}</span>`).join("")}</div><div class="post-meta"><span>${item.same} 认同</span><span>${item.ask} 追问</span></div><div class="actions"><button class="mini" data-same="${index}">认同 ${item.same}</button><button class="mini" data-ask="${index}">追问 ${item.ask}</button><button class="mini" data-collect="${index}">收藏足迹</button></div></article>`;
+      byId("libraryGrid").className = "grid";
+      byId("libraryGrid").innerHTML = zones.map(zone => {
+        const posts = state.library.map((item, index) => ({ item, index })).filter(({ item }) => (item.zone || "free") === zone.id);
+        return `<section class="content-zone"><div class="content-zone-heading"><h3>${zone.title}</h3><p>${zone.note}</p></div><div class="grid three">${posts.map(({ item, index }) => card(item, index)).join("") || `<div class="empty">这里还没有表达，完成一次${zone.title}创作后会出现在这里。</div>`}</div></section>`;
+      }).join("");
+      bindLibraryActions();
+    }
+
+    function bindLibraryActions() {
+      document.querySelectorAll("[data-same]").forEach(button => button.addEventListener("click", () => { state.library[Number(button.dataset.same)].same += 1; persistState(); renderLibrary(); }));
+      document.querySelectorAll("[data-ask]").forEach(button => button.addEventListener("click", () => { state.library[Number(button.dataset.ask)].ask += 1; persistState(); renderLibrary(); }));
+      document.querySelectorAll("[data-collect]").forEach(button => button.addEventListener("click", () => { collectLibraryFootprint(state.library[Number(button.dataset.collect)]); showView("footprints"); }));
+      document.querySelectorAll("[data-read]").forEach(button => button.addEventListener("click", () => openReader(Number(button.dataset.read))));
+    }
+
+    function renderFeaturedExpressions() {
+      const zones = [
+        { id: "free", title: "自由表达代表作" },
+        { id: "exam", title: "真题训练代表作" }
+      ];
+      byId("featuredExpressions").className = "grid";
+      byId("featuredExpressions").innerHTML = zones.map(zone => {
+        const posts = state.library.map((item, index) => ({ item, index })).filter(({ item }) => (item.zone || "free") === zone.id).slice(0, 3);
+        return `<section class="content-zone"><div class="content-zone-heading"><h3>${zone.title}</h3><p>我的代表表达</p></div><div class="grid featured-grid">${posts.map(({ item, index }) => `<article class="library-card"><button class="post-cover cover-button" data-featured-read="${index}" aria-label="阅读:${escapeAttr(item.title)}"><span class="tag">${escapeHtml(item.author)}</span><span class="cover-title">${escapeHtml(item.title)}</span><p>${escapeHtml(item.claim)}</p></button>${renderReferences(item.references)}<p class="post-snippet">${escapeHtml(item.text.slice(0, 130))}${item.text.length > 130 ? "…" : ""}</p></article>`).join("") || `<div class="empty">还没有${zone.title}。</div>`}</div></section>`;
+      }).join("");
+      document.querySelectorAll("[data-featured-read]").forEach(button => button.addEventListener("click", () => openReader(Number(button.dataset.featuredRead))));
+    }
+
+    const originalAddFootprint = addFootprint;
+    addFootprint = function(text, tags, type, references = []) {
+      originalAddFootprint(text, tags, type);
+      state.footprints[0].category = type === "表达工坊" ? (studioMode === "exam" ? "exam" : "free") : "personal";
+      if (references.length) state.footprints[0].references = references;
+      renderAll();
+    };
+
+    function editFootprintAtSource(item) {
+      const category = item.category || "personal";
+      if (category === "personal") {
+        loadFootprintIntoEditor(item.id);
+        return;
+      }
+      showView("studio");
+      setStudioMode(category === "exam" ? "exam" : "free");
+      byId("studioText").value = item.text;
+      if (category === "free") {
+        const tedReference = (item.references || []).find(reference => reference.type === "ted");
+        const replyReference = (item.references || []).find(reference => reference.type === "reply");
+        if (tedReference) {
+          const talk = state.tedTalks.find(candidate => candidate.title === tedReference.title);
+          if (talk) {
+            state.tedReferenceId = talk.id;
+            if (!state.tedFavorites.includes(talk.id)) state.tedFavorites = [talk.id, ...state.tedFavorites];
+          }
+          byId("studioSource").value = "ted";
+        } else if (replyReference) {
+          state.replyMaterial = {
+            viewpoint: replyReference.title || "",
+            link: replyReference.url || "",
+            attachmentName: replyReference.subtitle || "",
+            imageData: replyReference.imageData || ""
+          };
+          byId("studioSource").value = "reply";
+        } else {
+          byId("studioSource").value = "feeling";
+        }
+      }
+      renderStudioReferenceFields();
+      updateEntryHint();
+      byId("entryHint").textContent = category === "exam"
+        ? "正在编辑从真题训练存入的内容，可继续完成训练后重新保存。"
+        : "正在编辑从自由表达存入的内容，可继续完善后重新保存。";
+      byId("studioText").focus();
+      persistState();
+    }
+
+    function deleteFootprint(id) {
+      const item = findFootprint(id);
+      if (!item || !window.confirm("确认删除这条足迹吗？此操作无法撤销。")) return;
+      state.footprints = state.footprints.filter(footprint => footprint.id !== id);
+      state.selectedIds = state.selectedIds.filter(selectedId => selectedId !== id);
+      if (state.editingFootprintId === id) state.editingFootprintId = null;
+      persistState();
+      renderAll();
+    }
+
+    const originalRenderFootprints = renderFootprints;
+    renderFootprints = function() {
+      originalRenderFootprints();
+      document.querySelectorAll(".note").forEach(note => {
+        const item = findFootprint(Number(note.dataset.note));
+        if (item?.references?.length) note.insertAdjacentHTML("beforeend", renderReferences(item.references));
+      });
+      const board = byId("footprintBoard");
+      const cards = [...board.querySelectorAll(":scope > .note")];
+      if (!cards.length) return;
+      const groups = [
+        { id: "personal", title: "我的足迹", note: "直接记录下来的感受、念头与片段。" },
+        { id: "free", title: "我的自由表达", note: "从表达工坊的自由表达中存入。" },
+        { id: "exam", title: "我的真题练习", note: "从表达工坊的真题训练中存入。" }
+      ];
+      const cardsByGroup = new Map(groups.map(group => [group.id, []]));
+      cards.forEach(card => {
+        const item = findFootprint(Number(card.dataset.note));
+        const actions = card.querySelector(".note-actions");
+        if (item && actions) {
+          const editButton = actions.querySelector("[data-edit-note]");
+          editButton?.addEventListener("click", event => {
+            event.stopImmediatePropagation();
+            editFootprintAtSource(item);
+          }, true);
+          const deleteButton = document.createElement("button");
+          deleteButton.type = "button";
+          deleteButton.className = "mini danger";
+          deleteButton.textContent = "删除";
+          deleteButton.addEventListener("click", () => deleteFootprint(item.id));
+          actions.appendChild(deleteButton);
+        }
+        const category = item?.category || "personal";
+        (cardsByGroup.get(category) || cardsByGroup.get("personal")).push(card);
+      });
+      board.className = "footprint-groups";
+      board.replaceChildren();
+      groups.forEach(group => {
+        const items = cardsByGroup.get(group.id);
+        const section = document.createElement("section");
+        section.className = "footprint-group";
+        section.innerHTML = `<div class="footprint-group-heading"><h4>${group.title}</h4><p>${group.note}</p></div>`;
+        const layout = document.createElement("div");
+        layout.className = "footprint-board";
+        if (items.length) items.forEach(item => layout.appendChild(item));
+        else layout.innerHTML = `<div class="empty">这里还没有内容。</div>`;
+        section.appendChild(layout);
+        board.appendChild(section);
+      });
+    };
+
+    const originalPersistState = persistState;
+    persistState = function() {
+      originalPersistState();
+      try {
+        const saved = JSON.parse(localStorage.getItem(storageKey) || "{}");
+        saved.tedFavorites = state.tedFavorites;
+        saved.tedReferenceId = state.tedReferenceId;
+        saved.replyMaterial = state.replyMaterial;
+        localStorage.setItem(storageKey, JSON.stringify(saved));
+      } catch (error) {
+        console.info("无法保存扩展状态", error);
+      }
+    };
+
+    initializeExtensionFeatures();
     renderAll();
+    renderTedInspiration();
     applyViewTheme(state.view);
     updateEntryHint();
   </script>
